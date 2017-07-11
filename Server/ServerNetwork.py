@@ -1,8 +1,10 @@
+import sys
 from Networking import Networking
 import threading
 import queue
 import socket
 import time
+import errno
 
 class ServerNetwork(Networking):
     __host = socket.gethostname()
@@ -18,11 +20,13 @@ class ServerNetwork(Networking):
 
         accept_args = (self.__socket_dict, self.__thread_lock)
         self.__accept_thread = threading.Thread(target = self.__accept_sockets, args = accept_args )
-
-        self.__smsgs_thread = None
-        self.__rmsgs_thread = None
         self.__accept_thread.start()
 
+        rmsgs_args = (self.__socket_dict, self.__thread_lock, self.__rmsgs_queue)
+        self.__rmsgs_thread = threading.Thread(target=self.__excute_receive, args=rmsgs_args)
+        self.__rmsgs_thread.start()
+
+        self.__smsgs_thread = None
 
     def __accept_sockets(self, s_dict, d_lock):
         s = socket.socket()
@@ -42,8 +46,22 @@ class ServerNetwork(Networking):
     def __execute_send(self, s_dict, d_lock, s_queue):
         pass
 
-    def __excute_recieve(self, s_dict, d_lock, r_queue):
-        pass
+    def __excute_receive(self, s_dict, d_lock, r_queue):
+        while True:
+            d_lock.acquire()
+            for key, s in s_dict.items():
+                try:
+                    msg = s.recv(4096)
+                    if len(msg) != 0:
+                        self.__rmsgs_queue.put(msg.decode("utf-8"))
+                except socket.error as e:
+                    err = e.args[0]
+                    if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+                        continue
+                    else:
+                        print("ERROR: " + str(e))
+            d_lock.release()
+            time.sleep(1)
 
     def send_error(self, address, error):
         e = {address, error}
