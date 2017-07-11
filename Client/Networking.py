@@ -10,4 +10,4 @@ class Networking:
     def send_message(self, msg): raise NotImplementedError
 
     @abstractmethod
-    def receive_next_method(self): raise NotImplementedError
+    def receive_next_message(self): raise NotImplementedError
