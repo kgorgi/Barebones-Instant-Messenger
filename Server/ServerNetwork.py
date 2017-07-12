@@ -78,8 +78,8 @@ class ServerNetwork(Networking):
             d_lock.release()
             time.sleep(1)
 
-    def send_error(self, address, error):
-        e = {address, error}
+    def send_response(self, address, response):
+        e = {address, response}
         self.__smsgs_queue.put(e)
 
     def send_message(self, addresses, msg):
