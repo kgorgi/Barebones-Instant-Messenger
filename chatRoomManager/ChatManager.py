@@ -30,13 +30,13 @@ class ChatManager:
 		
 	def execute_cmd(self,cmd):
 		if(cmd["command"]=="C"):#Create
-			self.create_room(cmd)
+			return self.create_room(cmd)
 		elif(cmd["command"]=="J"):#Join
-			self.join_room(cmd)
+			return self.join_room(cmd)
 		elif(cmd["command"]=="L"):#Leave
-			self.leave_room(cmd
-		elif(cmd["command"]=="S"):#Send
-			self.send_message(cmd)
+			return self.leave_room(cmd)
+		elif(cmd["send"]=="S"):#Send
+			return self.send_message(cmd)
 		else:
 			print("invalid command")
 			return False
@@ -44,38 +44,49 @@ class ChatManager:
 	def create_room(self,cmd):
 		deprint("Create Room")
 		
-		for each in rooms:
+		for each in self.rooms:
 			if(each.get_name==cmd["room"]):
 				deprint("Room already Exists")
 				return False
 		
-		rooms[cmd["room"]]=Room.room(cmd["address"],cmd["alias"],cmd["room"])
+		self.rooms[cmd["room"]]=Room.Room(cmd["address"],cmd["alias"],cmd["room"])
 		deprint("Room Created")
 		return True
 		
 	def join_room(self,cmd_data):
 		deprint("Join Room")
 		#catch exception for room not existing
-		return rooms[cmd["room"]].add_user(cmd["address"],cmd["alias"])
+		return self.rooms[cmd["room"]].add_user(cmd["address"],cmd["alias"])
 		
 	def leave_room(self,cmd_data):
 		deprint("Leave Room")
-		rooms[cmd["room"]].remove_user(cmd["address"],cmd["alias"])
+		#catch exception for room not existing
+		return self.rooms[cmd["room"]].remove_user(cmd["address"],cmd["alias"])
 		
-	def Send_message(self,cmd_data):
+	def send_message(self,cmd_data):
 		deprint("Send message")
 		
+		addresses=self.rooms[cmd["room"]].get_address_list
+		#send_message(addresses,cmd["message"])
+		return True
 
 		
+	"""
+	def main(): #Put at the bottom
 		
-	#def main(): #Put at the bottom
-
+			while(True):
+				json=*getnextmsg
+				data=self.parse_incoming(json)
+				error=self.execute_cmd(data)
+				send_error(data["address"],error)
+	"""		
 
 	
 	
 if __name__=='__main__':
-		#main()
-		print("Wait")
+		#self.__init__()
+		#self.main()
+		print("Need to implment networkin still, see TestChatManager for trial runs")
 		
 def deprint(string):
 	print(string)
