@@ -1,0 +1,8 @@
+message=
+		{
+			"command": "a",
+			"alias": "b",
+			"address": "c",
+			"room": "d",
+			"message":null
+		}
