@@ -20,13 +20,20 @@ class ServerNetwork(Networking):
 
         accept_args = (self.__socket_dict, self.__thread_lock)
         self.__accept_thread = threading.Thread(target = self.__accept_sockets, args = accept_args )
+        #self.__accept_thread.setDaemon(True)
         self.__accept_thread.start()
 
+
         rmsgs_args = (self.__socket_dict, self.__thread_lock, self.__rmsgs_queue)
-        self.__rmsgs_thread = threading.Thread(target=self.__excute_receive, args=rmsgs_args)
+        self.__rmsgs_thread = threading.Thread(target=self.__exceute_receive, args=rmsgs_args)
+        #self.__rmsgs_thread.setDaemon(True)
         self.__rmsgs_thread.start()
 
-        self.__smsgs_thread = None
+        smsgs_args = (self.__socket_dict, self.__thread_lock, self.__smsgs_queue)
+        self.__smsgs_thread = threading.Thread(target=self.__execute_send, args=smsgs_args)
+        #self.__smsgs_thread.setDaemon(True)
+        self.__smsgs_thread.start()
+
 
     def __accept_sockets(self, s_dict, d_lock):
         s = socket.socket()
@@ -44,9 +51,17 @@ class ServerNetwork(Networking):
             d_lock.release()
 
     def __execute_send(self, s_dict, d_lock, s_queue):
-        pass
+        while True:
+            if not s_queue.empty():
+                addr, msg_to_send = s_queue.get()
+                s_queue.task_done()
+                d_lock.acquire()
+                s_dict[addr].send(msg_to_send.encode("utf-8"))
+                d_lock.release()
+            else:
+                time.sleep(1)
 
-    def __excute_receive(self, s_dict, d_lock, r_queue):
+    def __exceute_receive(self, s_dict, d_lock, r_queue):
         while True:
             d_lock.acquire()
             for key, s in s_dict.items():
@@ -69,12 +84,12 @@ class ServerNetwork(Networking):
 
     def send_message(self, addresses, msg):
         for adrs in addresses:
-            e = {adrs, msg}
+            e = (adrs, msg)
             self.__smsgs_queue.put(e)
 
     def retrieve_next_message(self):
         if not self.__rmsgs_queue.empty():
-            return self.rmsgs_queue.get()
+            return self.__rmsgs_queue.get()
         return None
 
 def main():
@@ -82,4 +97,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

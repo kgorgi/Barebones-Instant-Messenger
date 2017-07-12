@@ -1,9 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
 class Networking():
-    @abstractmethod
-    def __init__(self):
-        raise NotImplementedError
 
     @abstractmethod
     def send_error(self, address, error):
