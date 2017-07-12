@@ -9,11 +9,11 @@ class Room:
 	def add_user(self, address,alias):
 		#adds user to room
 		for ad,al in self.__user_list:
-			if(al == alias): return False
+			if(al == alias): return "User Exists"
 		#	if(ad == address) return False #This check depends on network
 		
 		self.__user_list.append((address,alias))
-		return True
+		return 0
 		
 		
 	def remove_user(self, address, alias):
@@ -21,9 +21,9 @@ class Room:
 		for user in self.__user_list:
 			if(user[1]==alias):
 				self.__user_list.remove(user)
-				return True
+				return 0
 				
-		return False
+		return "User Doesnt Exist"
 		
 		
 		
