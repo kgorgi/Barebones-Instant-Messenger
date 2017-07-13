@@ -2,14 +2,13 @@ import unittest
 import socket
 import queue
 import socket
-from networking.server_networking import ServerNetwork
+from snet.socket_server import ServerNetwork
 
 
 class TestServerNetwork(unittest.TestCase):
     def setUp(self):
         self.server_N = ServerNetwork()
         self.client_s = socket.socket()
-
 
     def tearDown(self):
         del self.server_N

@@ -5,15 +5,16 @@ import time
 import errno
 import atexit
 import logging
-import networking
+from snet.snet_interface import Networking
 
-class ServerNetwork(networking.Networking):
+class ServerNetwork(Networking):
     _host = socket.gethostname()
     _port = 8000
 
     def __init__(self):
         logging.basicConfig(level=logging.INFO)
         logging.info("Starting Server Networking")
+
         self._socket_dict = dict()
         self._accept_s = socket.socket()
 
