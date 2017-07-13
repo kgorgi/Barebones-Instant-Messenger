@@ -1,9 +1,11 @@
-import tkinter as tk
 from tkinter import *
+from client_handler import ClientHandler
 
 #function to bring frame to foreground
 def raise_frame(frame):
     frame.tkraise()
+
+client_handler = ClientHandler()
 
 #create initial window
 root = Tk()
@@ -26,6 +28,7 @@ root.title("ChatClient")
 #user_setup widgets initialized
 chatroom = StringVar()
 chatroom_entry = Entry(user_setup,highlightbackground='black', textvariable=chatroom)
+chatroom_entry.place(x=200, y=170)
 
 alias = StringVar()
 alias_entry = Entry(user_setup,highlightbackground='black', textvariable=alias)
@@ -33,7 +36,7 @@ alias_entry.place(x=400, y=170)
 
 chatroom_label = Label(user_setup, bg='blue', text = "Enter Chatroom")
 chatroom_label.place(x=200, y=200)
-		
+
 alias_label = Label(user_setup, bg='blue', text = "Enter Alias")
 alias_label.place(x=400, y=200)
 		
@@ -64,6 +67,7 @@ message_text['yscrollcommand'] = scrollbar.set
 #push index to bottom of text and disable typing
 for i in range(1,28):
 	message_text.insert(INSERT, "\n")
+
 message_text.insert(INSERT, "You are in a chatroom -_-")
 message_text['state'] = DISABLED
 
@@ -72,8 +76,10 @@ def login(method):
 	#send data
 	#receive error code
 	#if good
+
+
 	
-	# returned error code 
+	# returned error code
 	error_code = 0
 	error_message = StringVar()
 	error = Message(user_setup, bg = 'red',font=('times', 24, 'bold'), textvariable=error_message)
@@ -94,7 +100,8 @@ def login(method):
 			error_message.set("No Connection To Internet")
 			error.place(x=300, y = 280)
 			return None
-		
+
+
 	#go to main_view and show text display frame
 	raise_frame(main_view)
 	main_view.visible = True
@@ -126,13 +133,9 @@ def on_closing():
 	#input function to leave
 	print("goodbye")
 	root.destroy()
-	
-		      
+
 
 raise_frame(user_setup)
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.bind('<Return>', send_enter)
 root.mainloop()
-
-       	
-       	

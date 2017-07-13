@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-class Networking:
+class ClientBackend:
     __metaclass__ = ABCMeta
 
     @classmethod
