@@ -1,9 +1,8 @@
-
-
+from networking.client_networking import ClientNetworking
 class ClientHandler:
 
 	def __init__(self):
-		self.networkService = Networking.Networking()
+		self._networkService = ClientNetworking()
 		
 		
 		self.room_name = ""
@@ -11,34 +10,41 @@ class ClientHandler:
 		self.messages = []
 
 
-		client_address = self.networkingService.get_local_address()
+		self.client_address = self.networkingService.get_local_address()
 
-	def join_room(room_name, alias):
+	def join_room(self, room_name, alias):
 		join_json = '{"command": "J","alias": "' + alias + '","address": "'+ room_name +\
-		'","room": "'+ client_address +'","message": null}'
+		'","room": "'+ self.client_address +'","message": null}'
 		
-		send_message(join_json)
+		self._networkService.send_message(join_json)
 		
-		code = null
-		while code == null:
-			code = recieve_next_message()
+		code = None
+		while code == None:
+			code = self._networkServicerecieve_next_message()
 		return int(code)
+
+		if code is "0":
+			self.room_name = room_name
+			self.alias_name = alias
 		
-	def create_room(room_name, alias):
+	def create_room(self,room_name, alias):
 		create_json = '{"command": "C","alias": "' + alias + '","address": "'+ room_name +\
-		'","room": "'+ client_address +'","message": null}'
+		'","room": "'+ self.client_address +'","message": null}'
 		
-		send_message(create_json)
+		self._networkService.send_message(create_json)
 		
-		code = null
-		while code == null:
-			code = recieve_next_message()
+		code = None
+		while code == None:
+			code = self._networkService.recieve_next_message()
 		return int(code)
 		
-	def leave_room(room_name, alias):
+	def leave_room(self,room_name, alias):
 		leave_json = '{"command": "L","alias": "' + alias + '","address": "'+ room_name +\
-		'","room": "'+ client_address +'","message": null}'
+		'","room": "'+ self.client_address +'","message": null}'
 		
 		
-	def update():
-		new_message = recieve_next_message()
+	def update(self):
+		new_message = self._networkServicerecieve_next_message()
+
+	def send_message(self, msg):
+		self._networkService.send_message(msg)
