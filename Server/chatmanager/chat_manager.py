@@ -1,13 +1,13 @@
-import Room
 import json
-import ServerNetwork
-
+from chatmanager.room import Room
+from networking.server_networking import ServerNetwork
 
 class ChatManager:
-	
+
+
 	def __init__(self):
 		self.__rooms={}
-		self.__Network=ServerNetwork.ServerNetwork()
+		self.__Network=ServerNetwork()
 	
 	"""
 		JSON form:
@@ -50,7 +50,7 @@ class ChatManager:
 				deprint("Room already Exists")
 				return "Room Exists"
 		
-		self.__rooms[cmd["room"]]=Room.Room(cmd["address"],cmd["alias"],cmd["room"])
+		self.__rooms[cmd["room"]]=Room(cmd["address"],cmd["alias"],cmd["room"])
 		deprint("Room(Name:"+cmd["room"]+") Created")
 		return 0
 		
@@ -68,7 +68,7 @@ class ChatManager:
 		deprint("Send message")
 		
 		addresses=self.__rooms[cmd["room"]].get_address_list
-		send_message(addresses,cmd["message"])
+		self.__Network.send_message(addresses,cmd["message"])
 		return 0
 
 	
@@ -78,14 +78,14 @@ class ChatManager:
 
 
 
-	def main(): #Put at the bottom
+	def main(self): #Put at the bottom
 		
 			while(True):
-				json=retrieve_next_message()
+				json=self.__Network.retrieve_next_message()
 				if(json is not None):
 					data=self.parse_incoming(json)
 					response=self.execute_cmd(data)
-					send_response(data["address"],response)
+					self.__Network.send_response(data["address"],response)
 
 
 	

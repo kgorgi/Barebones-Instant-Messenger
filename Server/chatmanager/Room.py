@@ -1,6 +1,4 @@
 class Room:
-
-	
 	def __init__(self, address, alias, name):
 		self.__name=name #roomName
 		self.__user_list=[(address,alias)]

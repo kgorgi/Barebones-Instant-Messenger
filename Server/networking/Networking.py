@@ -2,8 +2,9 @@ from abc import ABCMeta, abstractmethod
 
 class Networking():
 
+
     @abstractmethod
-    def send_error(self, address, error):
+    def send_response(self, address, error):
         raise NotImplementedError
 
     @abstractmethod

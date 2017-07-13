@@ -1,10 +1,9 @@
-import sys
-from Networking import Networking
 import threading
 import queue
 import socket
 import time
 import errno
+from .networking import Networking
 
 class ServerNetwork(Networking):
     __host = socket.gethostname()
