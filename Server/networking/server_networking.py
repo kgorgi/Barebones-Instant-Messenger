@@ -3,40 +3,49 @@ import queue
 import socket
 import time
 import errno
-from networking import Networking
+import atexit
+import logging
+from .networking import Networking
 
 class ServerNetwork(Networking):
     _host = socket.gethostname()
     _port = 8000
 
     def __init__(self):
+        logging.basicConfig(level=logging.INFO)
+        logging.info("Starting Server Networking")
         self._socket_dict = dict()
+        self._accept_s = socket.socket()
 
         self._rmsgs_queue = queue.Queue()
         self._smsgs_queue = queue.Queue()
 
         self._thread_lock = threading.Lock()
 
-        accept_args = (self._socket_dict, self._thread_lock)
+        logging.info("Creating Accept Socket Thread")
+        accept_args = (self._accept_s, self._socket_dict, self._thread_lock)
         self._accept_thread = threading.Thread(target = self._accept_sockets, args = accept_args )
-        #self._accept_thread.setDaemon(True)
+        self._accept_thread.setDaemon(True)
         self._accept_thread.start()
 
-
+        logging.info("Creating Receive Messages Thread")
         rmsgs_args = (self._socket_dict, self._thread_lock, self._rmsgs_queue)
         self._rmsgs_thread = threading.Thread(target=self._exceute_receive, args=rmsgs_args)
-        #self._rmsgs_thread.setDaemon(True)
+        self._rmsgs_thread.setDaemon(True)
         self._rmsgs_thread.start()
 
+        logging.info("Creating Send Messages Thread")
         smsgs_args = (self._socket_dict, self._thread_lock, self._smsgs_queue)
         self._smsgs_thread = threading.Thread(target=self._execute_send, args=smsgs_args)
-        #self._smsgs_thread.setDaemon(True)
+        self._smsgs_thread.setDaemon(True)
         self._smsgs_thread.start()
 
+        atexit.register(self._socket_cleanup)
 
-    def _accept_sockets(self, s_dict, d_lock):
-        s = socket.socket()
+    def _accept_sockets(self,s, s_dict, d_lock):
         server_address = (self._host, self._port)
+        logging.info("Binding To: " + str(server_address))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(server_address)
         s.listen(5)
 
@@ -44,7 +53,7 @@ class ServerNetwork(Networking):
             client, addr = s.accept()
             client.setblocking(0)
             str_addr = str(addr[0]) + ":" +  str(addr[1])
-
+            logging.info("Adding Client: " + str_addr)
             d_lock.acquire()
             s_dict[str_addr] = client
             d_lock.release()
@@ -52,11 +61,13 @@ class ServerNetwork(Networking):
     def _execute_send(self, s_dict, d_lock, s_queue):
         while True:
             if not s_queue.empty():
+                print("Sending")
                 addr, msg_to_send = s_queue.get()
                 s_queue.task_done()
                 d_lock.acquire()
                 s_dict[addr].send(msg_to_send.encode("utf-8"))
                 d_lock.release()
+                logging.info("Sent(" + addr + "): " + msg_to_send)
             else:
                 time.sleep(1)
 
@@ -67,18 +78,20 @@ class ServerNetwork(Networking):
                 try:
                     msg = s.recv(4096)
                     if len(msg) != 0:
-                        self.__rmsgs_queue.put(msg.decode("utf-8"))
+                        msg = msg.decode("utf-8")
+                        logging.info("Received(" + key + "): " + msg)
+                        self._rmsgs_queue.put(msg)
                 except socket.error as e:
                     err = e.args[0]
                     if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
                         continue
                     else:
-                        print("ERROR: " + str(e))
+                        logging.debug(str(e))
             d_lock.release()
             time.sleep(1)
 
     def send_response(self, address, response):
-        e = {address, response}
+        e = (address, response)
         self._smsgs_queue.put(e)
 
     def send_message(self, addresses, msg):
@@ -91,9 +104,18 @@ class ServerNetwork(Networking):
             return self._rmsgs_queue.get()
         return None
 
+    def _socket_cleanup(self):
+        logging.info("Cleaning Up Sockets")
+        self._thread_lock.acquire()
+        for key, s in self._socket_dict.items():
+            s.shutdown(socket.SHUT_RDWR)
+        logging.info("Successful Socket Cleanup")
+        self._accept_s.close(self)
+        self._thread_lock.release()
 
 def main():
     n = ServerNetwork()
+    input("Press a key to exit\n")
 
 if __name__ == "__main__":
     main()
