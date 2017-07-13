@@ -1,89 +1,90 @@
 from networking.client_networking import ClientNetworking
+import json
+
 class ClientHandler:
 
-	def __init__(self):
+    #Sever feedback codes
+    SUCCESS = "0"
+
+
+    def __init__(self):
 		self._networkService = ClientNetworking()
-		
-		
+
 		self.room_name = ""
 		self.alias_name = ""
 		self.messages = []
 
-
 		self.client_address = self.networkingService.get_local_address()
 
-	def join_room(self, room_name, alias):
+    def join_room(self, room_name, alias):
 		join = {
 			"command": "J",
 			"alias": alias,
 			"address": room_name,
 			"room": self.client_address,
-			"message": null
+			"message": None
 		}
 
 		join_json = json.dumps(join)
-
 		self._networkService.send_message(join_json)
 		
-		code = None
-		while code is None:
-			code = self._networkServicerecieve_next_message()
+		server_feedback = None
+		while server_feedback is None:
+			server_feedback = self._networkServicerecieve_next_message()
 
-		if code is "0":
+		if server_feedback is self.SUCCESS:
 			self.room_name = room_name
 			self.alias_name = alias
 
-		return int(code)
+		return int(server_feedback)
 		
-	def create_room(self,room_name, alias):
+    def create_room(self,room_name, alias):
 		create = {
 			"command": "C",
 			"alias": alias,
 			"address": room_name,
 			"room": self.client_address,
-			"message": null
+			"message": None
 		}
 
 		create_json = json.dumps(create)
 		self._networkService.send_message(create_json)
 		
-		code = None
-		while code is None:
-			code = self._networkService.recieve_next_message()
+		server_feedback = None
+		while server_feedback is None:
+			server_feedback = self._networkService.recieve_next_message()
 
-		if code is "0":
+		if server_feedback is self.SUCCESS:
 			self.room_name = room_name
 			self.alias_name = alias
 
-		return int(code)
+		return int(server_feedback)
 		
-	def leave_room(self):
+    def leave_room(self):
 
 		leave = {
 			"command": "L",
 			"alias": self.alias,
 			"address": self.room_name,
 			"room": self.client_address,
-			"message": null
+			"message": None
 		}
 
 		leave_json = json.dumps(leave)
 		self._networkService.send_message(leave_json)
 
-	def update(self):
+    def update(self):
 		new_message = self._networkServicerecieve_next_message()
-
 		return new_message
 
-	def send_message(self, msg):
+    def send_message(self, msg):
 		message = {
 			"command": "S",
-			"alias": null,
-			"address": null,
+			"alias": None,
+			"address": None,
 			"room": self.client_address,
 			"message": msg
 		}
 
 		message_json = json.dumps(message)
-
 		self._networkService.send_message(message_json)
