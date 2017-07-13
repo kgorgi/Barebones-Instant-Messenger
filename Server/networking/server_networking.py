@@ -3,40 +3,40 @@ import queue
 import socket
 import time
 import errno
-from .networking import Networking
+from networking import Networking
 
 class ServerNetwork(Networking):
-    __host = socket.gethostname()
-    __port = 8000
+    _host = socket.gethostname()
+    _port = 8000
 
     def __init__(self):
-        self.__socket_dict = dict()
+        self._socket_dict = dict()
 
-        self.__rmsgs_queue = queue.Queue()
-        self.__smsgs_queue = queue.Queue()
+        self._rmsgs_queue = queue.Queue()
+        self._smsgs_queue = queue.Queue()
 
-        self.__thread_lock = threading.Lock()
+        self._thread_lock = threading.Lock()
 
-        accept_args = (self.__socket_dict, self.__thread_lock)
-        self.__accept_thread = threading.Thread(target = self.__accept_sockets, args = accept_args )
-        #self.__accept_thread.setDaemon(True)
-        self.__accept_thread.start()
-
-
-        rmsgs_args = (self.__socket_dict, self.__thread_lock, self.__rmsgs_queue)
-        self.__rmsgs_thread = threading.Thread(target=self.__exceute_receive, args=rmsgs_args)
-        #self.__rmsgs_thread.setDaemon(True)
-        self.__rmsgs_thread.start()
-
-        smsgs_args = (self.__socket_dict, self.__thread_lock, self.__smsgs_queue)
-        self.__smsgs_thread = threading.Thread(target=self.__execute_send, args=smsgs_args)
-        #self.__smsgs_thread.setDaemon(True)
-        self.__smsgs_thread.start()
+        accept_args = (self._socket_dict, self._thread_lock)
+        self._accept_thread = threading.Thread(target = self._accept_sockets, args = accept_args )
+        #self._accept_thread.setDaemon(True)
+        self._accept_thread.start()
 
 
-    def __accept_sockets(self, s_dict, d_lock):
+        rmsgs_args = (self._socket_dict, self._thread_lock, self._rmsgs_queue)
+        self._rmsgs_thread = threading.Thread(target=self._exceute_receive, args=rmsgs_args)
+        #self._rmsgs_thread.setDaemon(True)
+        self._rmsgs_thread.start()
+
+        smsgs_args = (self._socket_dict, self._thread_lock, self._smsgs_queue)
+        self._smsgs_thread = threading.Thread(target=self._execute_send, args=smsgs_args)
+        #self._smsgs_thread.setDaemon(True)
+        self._smsgs_thread.start()
+
+
+    def _accept_sockets(self, s_dict, d_lock):
         s = socket.socket()
-        server_address = (self.__host, self.__port)
+        server_address = (self._host, self._port)
         s.bind(server_address)
         s.listen(5)
 
@@ -49,7 +49,7 @@ class ServerNetwork(Networking):
             s_dict[str_addr] = client
             d_lock.release()
 
-    def __execute_send(self, s_dict, d_lock, s_queue):
+    def _execute_send(self, s_dict, d_lock, s_queue):
         while True:
             if not s_queue.empty():
                 addr, msg_to_send = s_queue.get()
@@ -60,7 +60,7 @@ class ServerNetwork(Networking):
             else:
                 time.sleep(1)
 
-    def __exceute_receive(self, s_dict, d_lock, r_queue):
+    def _exceute_receive(self, s_dict, d_lock, r_queue):
         while True:
             d_lock.acquire()
             for key, s in s_dict.items():
@@ -79,17 +79,18 @@ class ServerNetwork(Networking):
 
     def send_response(self, address, response):
         e = {address, response}
-        self.__smsgs_queue.put(e)
+        self._smsgs_queue.put(e)
 
     def send_message(self, addresses, msg):
         for adrs in addresses:
             e = (adrs, msg)
-            self.__smsgs_queue.put(e)
+            self._smsgs_queue.put(e)
 
     def retrieve_next_message(self):
-        if not self.__rmsgs_queue.empty():
-            return self.__rmsgs_queue.get()
+        if not self._rmsgs_queue.empty():
+            return self._rmsgs_queue.get()
         return None
+
 
 def main():
     n = ServerNetwork()
