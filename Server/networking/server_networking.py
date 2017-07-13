@@ -5,9 +5,9 @@ import time
 import errno
 import atexit
 import logging
-from .networking import Networking
+import networking
 
-class ServerNetwork(Networking):
+class ServerNetwork(networking.Networking):
     _host = socket.gethostname()
     _port = 8000
 
@@ -47,6 +47,7 @@ class ServerNetwork(Networking):
         logging.info("Binding To: " + str(server_address))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(server_address)
+
         s.listen(5)
 
         while True:
@@ -110,8 +111,11 @@ class ServerNetwork(Networking):
         for key, s in self._socket_dict.items():
             s.shutdown(socket.SHUT_RDWR)
         logging.info("Successful Socket Cleanup")
-        self._accept_s.close(self)
+        self._accept_s.close()
         self._thread_lock.release()
+
+    def __del__(self):
+        self._socket_cleanup()
 
 def main():
     n = ServerNetwork()
