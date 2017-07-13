@@ -11,3 +11,4 @@ class Networking:
 
     @abstractmethod
     def receive_next_message(self): raise NotImplementedError
+
