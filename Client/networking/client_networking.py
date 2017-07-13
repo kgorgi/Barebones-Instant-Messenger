@@ -1,4 +1,4 @@
-from Client.Networking import Networking
+from networking.networking import Networking
 import logging
 import json
 import socket

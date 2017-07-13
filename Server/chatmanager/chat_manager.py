@@ -49,12 +49,8 @@ class ChatManager:
 	def create_room(self, cmd):
 		deprint("Creating Room: "+cmd["room"])
 		
-		for each in self.__rooms:
-			#consider this change:
-			#for room in self._rooms
-			#if room = cmd["room"]:
-			#...
-			if(self.__rooms[each].get_name() == cmd["room"]):
+		for room in self.__rooms:
+			if(room.get_name() == cmd["room"]):
 				deprint("Room already Exists")
 				return "Room Exists"
 
@@ -80,29 +76,10 @@ class ChatManager:
 		addresses=self.__rooms[cmd["room"]].get_address_list
 		self.__Network.send_message(addresses,cmd["message"])
 		return 0
-
-	
 	
 	def get_room(self,room_name):
     		return self.__rooms[room_name]
 
-
-
-def main(): #Put at the bottom
-	i = ChatManager()
-	while(True):
-		json=i.__Network.retrieve_next_message()
-		if(json is not None):
-			data=i.parse_incoming(json)
-			response=i.execute_cmd(data)
-			i.__Network.send_response(data["address"],response)
-
-
-	
-	
-if __name__== "__main__":
-	main()
-	#print("Need to implment networkin still, see TestChatManager for trial runs")
 		
 def deprint(string):
 	print(string)
