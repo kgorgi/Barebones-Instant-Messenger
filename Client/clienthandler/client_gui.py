@@ -26,12 +26,11 @@ root.title("ChatClient")
 #user_setup widgets initialized
 chatroom = StringVar()
 chatroom_entry = Entry(user_setup,highlightbackground='black', textvariable=chatroom)
-chatroom_entry.place(x=200, y=170)
-			
+
 alias = StringVar()
 alias_entry = Entry(user_setup,highlightbackground='black', textvariable=alias)
 alias_entry.place(x=400, y=170)
-		
+
 chatroom_label = Label(user_setup, bg='blue', text = "Enter Chatroom")
 chatroom_label.place(x=200, y=200)
 		
