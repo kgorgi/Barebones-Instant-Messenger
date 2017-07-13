@@ -1,7 +1,10 @@
+#from networking.client_networking import ClientNetworking
+from client_backend import *
+from client_backend import ClientBackend
 from networking.client_networking import ClientNetworking
 import json
 
-class ClientHandler:
+class ClientHandler(ClientBackend):
 
     #Sever feedback codes
     SUCCESS = "0"
