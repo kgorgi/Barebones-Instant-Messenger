@@ -1,4 +1,5 @@
 import json
+import logging
 from chatmanager.room import Room
 from snet.socket_server import ServerNetwork
 
@@ -7,8 +8,10 @@ class ChatManager:
 	_port = 8000
 
 	def __init__(self):
+		logging.basicConfig(level=logging.INFO)
+		logging.info("Starting ChatManager")
 		self._rooms = {}
-		self._network = ServerNetwork(self._host, self._port)
+		self._networkService = ServerNetwork(self._host, self._port)
 	
 	"""
 		JSON form:
@@ -22,69 +25,69 @@ class ChatManager:
 					"message":""
 				}
 	"""
-	
+
 	def parse_incoming(self, in_json):
 		cmd_data = json.loads(in_json)
-		deprint("Command:"+cmd_data["command"]+
-				" Alias:"+cmd_data["alias"]+
-				" Address:"+cmd_data["address"]+
-				" Room:"+cmd_data["room"]+
-				" Message:"+str(cmd_data["message"])
+		logging.info("Command:" + cmd_data["command"]+
+				" Alias:" + cmd_data ["alias"] +
+				" Address:" + cmd_data["address"] +
+				" Room:" + cmd_data["room"]+
+				" Message:" + str(cmd_data["message"])
 				)
 		for item in cmd_data:
 			item = str(item)
 		return cmd_data
 		
 	def execute_cmd(self, cmd):
-		if(cmd["command"] == "C"):#Create
+		if(cmd["command"] == "C"): #Create
 			return self.create_room(cmd)
-		elif(cmd["command"] == "J"):#Join
+		elif(cmd["command"] == "J"): #Join
 			return self.join_room(cmd)
-		elif(cmd["command"] == "L"):#Leave
+		elif(cmd["command"] == "L"): #Leave
 			return self.leave_room(cmd)
-		elif(cmd["send"] == "S"):#Send
+		elif(cmd["command"] == "S"): #Send
 			return self.send_message(cmd)
 		else:
-			print("invalid command")
+			logging.debug("Invalid command:" + cmd["command"])
 			return False
-	
+
+	#Main Handling Logic of ChatManager
+	def run(self):
+		pass
+
+	#These functions should follow architecture with parameters
 	def create_room(self, cmd):
-		deprint("Creating Room: "+cmd["room"])
+		logging.info("Creating Room: " + cmd["room"])
 		
-		for room in self._rooms:
-			if(room.get_name() == cmd["room"]):
-				deprint("Room already Exists")
-				return "Room Exists"
-
-
+		if cmd["room"] in self._rooms:
+			logging.debug("Room: " + cmd["room"]+ " already exists")
+			return False
 
 		self._rooms[cmd["room"]] = Room(cmd["address"],cmd["alias"],cmd["room"])
-		deprint("Room(Name:"+cmd["room"]+") Created")
-		return 0
+		logging.info("Room(Name:"+ cmd["room"]+") Created")
+		return True
 		
 	def join_room(self,cmd):
-		deprint("Join Room")
-		#catch exception for room not existing
+		logging.info("ChatManager: Join Room")
+		# catch exception for room not existing
+		# return ints for error code
 		return self._rooms[cmd["room"]].add_user(cmd["address"],cmd["alias"])
 		
 	def leave_room(self,cmd):
-		deprint("Leave Room")
+		logging.info("ChatManager: Leave Room")
 		#catch exception for room not existing
 		return self._rooms[cmd["room"]].remove_user(cmd["address"],cmd["alias"])
 		
 	def send_message(self,cmd):
-		deprint("Send message")
-		
+		logging.info("ChatManager: Send message")
+
 		addresses=self._rooms[cmd["room"]].get_address_list
-		self._network.send_message(addresses,cmd["message"])
-		return 0
+		self._networkService.send_message(addresses,cmd["message"])
 	
 	def get_room(self,room_name):
-    		return self._rooms[room_name]
+		return self._rooms[room_name]
 
 	def __del__(self):
-		self._network.shutdown()
+		self._networkService.shutdown()
 
-def deprint(string):
-	print(string)
 

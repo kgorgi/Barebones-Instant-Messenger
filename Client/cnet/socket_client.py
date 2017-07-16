@@ -1,17 +1,16 @@
-from networking.networking import Networking
 import logging
-import json
 import socket
 import queue
 import threading
 from threading import Thread
 import time
 import errno
+from cnet.cnet_interface import Networking
 
 
 class ClientNetworking(Networking):
-    __host = "134.87.139.78"
-    __port = 9010
+    __host = "127.0.0.1"
+    __port = 8000
 
     def __init__(self):
 
@@ -89,7 +88,7 @@ def main():
     i.send_message("hello spicy boy")
 
     print(i.get_local_address())
-
+    """""
     clients = list()
     for i in range(1, 200):
         print(str(i))
@@ -113,7 +112,7 @@ def main():
     time.sleep(10)
 
 
-    
+    """
 
 
 if __name__ == "__main__":

@@ -1,11 +1,11 @@
 from tkinter import *
-from client_handler import ClientHandler
+from clienthandler.client_handler import ClientHandler
 
 #function to bring frame to foreground
 def raise_frame(frame):
     frame.tkraise()
 
-client_handler = ClientHandler()
+#client_handler = ClientHandler()
 
 #create initial window
 root = Tk()
