@@ -37,6 +37,26 @@ class TestServerNetwork(unittest.TestCase):
         client_msg = cls.client_s.recv(4096)
         cls.assertEqual(msg, client_msg.decode("utf-8"))
 
+    def test_send_message(cls):
+        msg = "MULTIMESSAGE2017"
+        second_socket = socket.socket()
+        second_socket.connect(("127.0.0.1", 8000))
+
+        addr1, port1 = (cls.client_s.getsockname())
+        address1 = "127.0.0.1:" + str(port1)
+
+        addr2, port2 = (second_socket.getsockname())
+        address2 = "127.0.0.1:" + str(port2)
+
+        addr_list = [address1, address2]
+
+        cls.server_N.send_message(addr_list, msg)
+
+        client_msg1 = cls.client_s.recv(4096)
+        cls.assertEqual(msg, client_msg1.decode("utf-8"))
+
+        client_msg2 = second_socket.recv(4096)
+        cls.assertEqual(msg, client_msg2.decode("utf-8"))
 
 if __name__ == '__main__':
     unittest.main()
