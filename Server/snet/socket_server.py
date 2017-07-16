@@ -9,6 +9,7 @@ from snet.snet_interface import Networking
 
 class ServerNetwork(Networking):
 
+
     def __init__(self, address, port):
         logging.basicConfig(level=logging.INFO)
         logging.info("Starting Server Networking")

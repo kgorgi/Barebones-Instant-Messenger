@@ -36,7 +36,7 @@ class TestChatManager(unittest.TestCase):
 		self.cm.execute_cmd(cmd)
 		jsin = '{"command": "J","alias": "Goh2","address": "1234","room": "RoomTest","message": null}'
 		cmd = self.cm.parse_incoming(jsin)
-		self.assertEqual(self.cm.execute_cmd(cmd),0)
+		self.assertEqual(self.cm.execute_cmd(cmd),True)
 		self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh","Goh2"])
 
 	def test_join_room_with_existing_alias(self):

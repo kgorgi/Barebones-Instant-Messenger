@@ -6,13 +6,15 @@ class TestRoom(unittest.TestCase):
 
 	def test_initializer(self):
 		rm = Room("ad1","alA","newRoom")
-		self.assertEqual(rm.get_user_list(),[("ad1","alA")])
+		self.assertEqual(rm.get_address_list(),["ad1"])
+		self.assertEqual(rm.get_alias_list(), ["alA"])
 		self.assertEqual(rm.get_name(),"newRoom")
 		
 	def test_add_user(self):
 		rm = Room("ad1","alA","newRoom")
 		rm.add_user("ad2","alB")
-		self.assertEqual(rm.get_user_list(),[("ad1","alA"),("ad2","alB")])
+		self.assertEqual(rm.get_address_list(),["ad1","ad2"])
+		self.assertEqual(rm.get_alias_list(), ["alA", "alB"])
 		
 	def test_add_user_duplicate(self):
 		rm = Room("ad1","alA","newRoom")
@@ -22,8 +24,9 @@ class TestRoom(unittest.TestCase):
 	def test_rm_user(self):
 		rm = Room("ad1","alA","newRoom")
 		rm.add_user("ad2","alB")
-		rm.remove_user("ad2","alB")
-		self.assertEqual(rm.get_user_list(),[("ad1","alA")])
+		rm.remove_user("ad1","alA")
+		self.assertEqual(rm.get_address_list(),["ad2"])
+		self.assertEqual(rm.get_alias_list(),["alB"])
 		
 	def test_rm_user_duplicate(self):
 		rm = Room("ad1","alA","newRoom")
