@@ -11,7 +11,7 @@ class ServerNetwork(Networking):
 
 
     def __init__(self, address, port):
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
         logging.info("Starting Server Networking")
 
         self._host = address
@@ -44,7 +44,7 @@ class ServerNetwork(Networking):
         self._smsgs_thread.setDaemon(True)
         self._smsgs_thread.start()
 
-        atexit.register(self.__del__)
+        atexit.register(self.shutdown)
 
     def _accept_sockets(self,s, s_dict, d_lock):
         server_address = (self._host, self._port)

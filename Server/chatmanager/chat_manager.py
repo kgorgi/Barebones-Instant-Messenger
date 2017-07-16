@@ -8,7 +8,7 @@ class ChatManager:
 	_port = 8000
 
 	def __init__(self):
-		logging.basicConfig(level=logging.INFO)
+		logging.basicConfig(level=logging.DEBUG)
 		logging.info("Starting ChatManager")
 		self._rooms = {}
 		self._networkService = ServerNetwork(self._host, self._port)

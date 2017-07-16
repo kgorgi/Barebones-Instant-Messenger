@@ -1,4 +1,5 @@
 import json
+import socket
 from clienthandler.client_backend import ClientBackend
 from cnet.socket_client import ClientNetworking
 
@@ -9,7 +10,7 @@ class ClientHandler(ClientBackend):
     SUCCESS = "0"
 
     def __init__(self):
-        self._networkService = ClientNetworking()
+        self._networkService = ClientNetworking(socket.gethostname(), 8000)
         self.room_name = ""
         self.alias_name = ""
         self.messages = []

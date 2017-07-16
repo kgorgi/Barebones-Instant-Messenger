@@ -2,39 +2,53 @@ import logging
 import socket
 import queue
 import threading
-from threading import Thread
 import time
 import errno
+import sys
 from cnet.cnet_interface import Networking
 
 
 class ClientNetworking(Networking):
-    __host = "127.0.0.1"
-    __port = 8000
 
-    def __init__(self):
+    def __init__(self, address, port):
+        self._successful_init = False
+        logging.basicConfig(level=logging.DEBUG)
+        logging.info("Starting Client Networking")
+
+        self._host = address
+        self._port = port
 
         self.send_msg_queue = queue.Queue()
         self.received_msg_queue = queue.Queue()
 
-        address = (self.__host, self.__port)
-        print("Attempting to connect!")
+        address = (self._host, self._port)
+        logging.info("Attempting to Connect to: " + self._host + ":" + str(self._port))
         self.client_socket = socket.socket()
-        self.client_socket.connect(address)
+        try:
+            self.client_socket.connect(address)
+        except ConnectionRefusedError as e:
+            logging.debug("Connection Failed: Connection Refused")
+            sys.exit(0)
+        except Exception as e:
+            logging.debug("Connection Failed")
+            sys.exit(0)
+
         self.client_socket.setblocking(0)
-        print("connected")
+        logging.info("Successfully Connected")
 
         self.thread_lock = threading.Lock()
 
         args_send = (self.client_socket, self.thread_lock ,self.send_msg_queue)
         self.send_msg_thread = threading.Thread(target=self.execute_send, args= args_send)
-        #self.send_msg_thread.setDaemon(True)
+        self.send_msg_thread.setDaemon(True)
         self.send_msg_thread.start()
 
         args_receive = (self.client_socket, self.thread_lock, self.received_msg_queue)
         self.receive_msg_thread = threading.Thread(target=self.execute_receive, args=args_receive)
-        #self.receive_msg_thread.setDaemon(True)
+        self.receive_msg_thread.setDaemon(True)
         self.receive_msg_thread.start()
+
+        self._successful_init = True
 
     def get_local_address(self):
         addr, port = (self.client_socket.getsockname())
@@ -48,7 +62,7 @@ class ClientNetworking(Networking):
             if not s_queue.empty():
                 msg_to_send = s_queue.get()
                 s_queue.task_done()
-                print("Sending message: " + "\"" + msg_to_send+ "\"")
+                logging.info("Sending message: " + "\"" + msg_to_send+ "\"")
                 lock_s.acquire()
                 s.send(msg_to_send.encode('utf-8'))
                 lock_s.release()
@@ -64,30 +78,41 @@ class ClientNetworking(Networking):
 
     def execute_receive(self, s, lock_r , r_queue):
         while True:
-
             try:
                 msg_received = s.recv(4096)
                 if len(msg_received) != 0:
                     msg_received = msg_received.decode("utf-8")
                     r_queue.put(msg_received)
-                    print("Received Message: " + "\"" +  msg_received + "\"")
+                    logging.info("Received Message: " + "\"" +  msg_received + "\"")
             except socket.error as e:
                 err = e.args[0]
                 if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
                     continue
                 else:
-                    print("ERROR: " + str(e))
+                    logging.debug("ERROR: " + str(e))
+                    break
 
             time.sleep(1)
 
+    def shutdown(self):
+        logging.info("ClientNetworking Shutting Down")
+        if (self._successful_init):
+            logging.info("Cleaning Up Socket")
+            self.thread_lock.acquire()
+            self.client_socket.close()
+            self.thread_lock.release()
+            logging.info("Successful Socket Cleanup")
 
+    def __del__(self):
+        self.shutdown()
 
 
 def main():
-    i = ClientNetworking()
+    i = ClientNetworking("127.0.0.1", 8000)
     i.send_message("hello spicy boy")
 
-    print(i.get_local_address())
+    time.sleep(5)
+    i.shutdown()
     """""
     clients = list()
     for i in range(1, 200):
