@@ -1,68 +1,64 @@
+import time
 import unittest
 from chatmanager.chat_manager import ChatManager
 from chatmanager.room import Room
 
 class TestChatManager(unittest.TestCase):
+	def setUp(self):
+		self.cm = ChatManager()
+
+	def tearDown(self):
+		del self.cm
 
 	def test_parser(self):
-		cm=ChatManager()
 		jsin='{"command": "a","alias": "b","address": "c","room": "d","message": null}'
-		self.assertEqual(cm.parse_incoming(jsin),{"command": "a","alias": "b","address": "c","room": "d","message": None})
-	
+		self.assertEqual(self.cm.parse_incoming(jsin),{"command": "a","alias": "b","address": "c","room": "d","message": None})
+
 	def test_execute_cmd(self):
-		cm= ChatManager()
 		jsin='{"command": "C","alias": "b","address": "c","room": "d","message": null}'
-		cmd=cm.parse_incoming(jsin)
-		self.assertEquals(cm.execute_cmd(cmd),0)
+		cmd=self.cm.parse_incoming(jsin)
+		self.assertEquals(self.cm.execute_cmd(cmd),0)
 		
 	def test_create_room(self):
-		cm= ChatManager()
 		jsin='{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-		cmd=cm.parse_incoming(jsin)
-		self.assertEqual(cm.execute_cmd(cmd), 0)
-		self.assertEqual(cm.get_room("RoomTest").get_name(),"RoomTest")
+		cmd=self.cm.parse_incoming(jsin)
+		self.assertEqual(self.cm.execute_cmd(cmd), 0)
+		self.assertEqual(self.cm.get_room("RoomTest").get_name(),"RoomTest")
 
 	def test_create_existing_room(self):
-		cm = ChatManager()
 		jsin = '{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-		cmd = cm.parse_incoming(jsin)
-		self.assertEqual(cm.execute_cmd(cmd), "Room Exists")
-		self.assertFalse(cm.execute_cmd(cmd))
-	
+		cmd = self.cm.parse_incoming(jsin)
+		self.assertFalse(self.cm.execute_cmd(cmd))
+
 	def test_join_room(self):
-		cm = ChatManager()
 		jsin = '{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-		cmd = cm.parse_incoming(jsin)
-		cm.execute_cmd(cmd)
+		cmd = self.cm.parse_incoming(jsin)
+		self.cm.execute_cmd(cmd)
 		jsin = '{"command": "J","alias": "Goh2","address": "1234","room": "RoomTest","message": null}'
-		cmd = cm.parse_incoming(jsin)
-		self.assertEqual(cm.execute_cmd(cmd),0)
-		self.assertEqual(cm.get_room("RoomTest").get_alias_list(),["Goh","Goh2"])
+		cmd = self.cm.parse_incoming(jsin)
+		self.assertEqual(self.cm.execute_cmd(cmd),0)
+		self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh","Goh2"])
 
 	def test_join_room_with_existing_alias(self):
-		cm = ChatManager()
 		jsin = '{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-		cmd = cm.parse_incoming(jsin)
-		cm.execute_cmd(cmd)
+		cmd = self.cm.parse_incoming(jsin)
+		self.cm.execute_cmd(cmd)
 		jsin = '{"command": "J","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-		cmd = cm.parse_incoming(jsin)
-		self.assertEqual(cm.execute_cmd(cmd),"User Exists")
-		self.assertEqual(cm.get_room("RoomTest").get_alias_list(),["Goh",])
-
+		cmd = self.cm.parse_incoming(jsin)
+		self.assertFalse(self.cm.execute_cmd(cmd),"User Exists")
+		self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh",])
 
 	def test_leave_room(self):
-		cm = ChatManager()
 		jsin = '{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-		cmd = cm.parse_incoming(jsin)
-		cm.execute_cmd(cmd)
+		cmd = self.cm.parse_incoming(jsin)
+		self.cm.execute_cmd(cmd)
 		jsin = '{"command": "J","alias": "Goh2","address": "1234","room": "RoomTest","message": null}'
-		cmd = cm.parse_incoming(jsin)
-		cm.execute_cmd(cmd)
+		cmd = self.cm.parse_incoming(jsin)
+		self.cm.execute_cmd(cmd)
 		jsin = '{"command": "L","alias": "Goh2","address": "1234","room": "RoomTest","message": null}'
-		cmd = cm.parse_incoming(jsin)
-		self.assertEqual(cm.execute_cmd(cmd),0)
-		self.assertEqual(cm.get_room("RoomTest").get_alias_list(),["Goh"])
-
+		cmd = self.cm.parse_incoming(jsin)
+		self.assertEqual(self.cm.execute_cmd(cmd),True)
+		self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh"])
 
 if __name__=='__main__':
 	unittest.main()

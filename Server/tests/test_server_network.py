@@ -1,7 +1,5 @@
 import unittest
 import socket
-import queue
-import socket
 from snet.socket_server import ServerNetwork
 
 
@@ -11,11 +9,11 @@ class TestServerNetwork(unittest.TestCase):
         self.client_s = socket.socket()
 
     def tearDown(self):
-        del self.server_N
+        self.server_N.shutdown()
         self.client_s.close()
 
     def test_add_client(self):
-        address = (socket.gethostname(), 8000)
+        address = ("127.0.0.1", 8000)
         try:
             self.client_s.connect(address)
         except ConnectionRefusedError:

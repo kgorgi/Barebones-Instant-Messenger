@@ -1,12 +1,12 @@
 import json
 from chatmanager.room import Room
-from networking.server_networking import ServerNetwork
+from snet.socket_server import ServerNetwork
 
 class ChatManager:
 
 	def __init__(self):
-		self.rooms = {}
-		self.Network = ServerNetwork()
+		self._rooms = {}
+		self._network = ServerNetwork()
 	
 	"""
 		JSON form:
@@ -49,39 +49,40 @@ class ChatManager:
 	def create_room(self, cmd):
 		deprint("Creating Room: "+cmd["room"])
 		
-		for room in self.__rooms:
+		for room in self._rooms:
 			if(room.get_name() == cmd["room"]):
 				deprint("Room already Exists")
 				return "Room Exists"
 
 
 
-		self.__rooms[cmd["room"]] = Room(cmd["address"],cmd["alias"],cmd["room"])
+		self._rooms[cmd["room"]] = Room(cmd["address"],cmd["alias"],cmd["room"])
 		deprint("Room(Name:"+cmd["room"]+") Created")
 		return 0
 		
 	def join_room(self,cmd):
 		deprint("Join Room")
 		#catch exception for room not existing
-		return self.__rooms[cmd["room"]].add_user(cmd["address"],cmd["alias"])
+		return self._rooms[cmd["room"]].add_user(cmd["address"],cmd["alias"])
 		
 	def leave_room(self,cmd):
 		deprint("Leave Room")
 		#catch exception for room not existing
-		return self.__rooms[cmd["room"]].remove_user(cmd["address"],cmd["alias"])
+		return self._rooms[cmd["room"]].remove_user(cmd["address"],cmd["alias"])
 		
 	def send_message(self,cmd):
 		deprint("Send message")
 		
-		addresses=self.__rooms[cmd["room"]].get_address_list
-		self.__Network.send_message(addresses,cmd["message"])
+		addresses=self._rooms[cmd["room"]].get_address_list
+		self._network.send_message(addresses,cmd["message"])
 		return 0
 	
 	def get_room(self,room_name):
-    		return self.__rooms[room_name]
+    		return self._rooms[room_name]
 
-		
+	def __del__(self):
+		self._network.shutdown()
+
 def deprint(string):
 	print(string)
-		
-		
+

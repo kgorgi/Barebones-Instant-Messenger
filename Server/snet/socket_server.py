@@ -8,7 +8,7 @@ import logging
 from snet.snet_interface import Networking
 
 class ServerNetwork(Networking):
-    _host = socket.gethostname()
+    _host = "127.0.0.1" #socket.gethostname()
     _port = 8000
 
     def __init__(self):
@@ -41,7 +41,7 @@ class ServerNetwork(Networking):
         self._smsgs_thread.setDaemon(True)
         self._smsgs_thread.start()
 
-        atexit.register(self._socket_cleanup)
+        atexit.register(self.__del__)
 
     def _accept_sockets(self,s, s_dict, d_lock):
         server_address = (self._host, self._port)
@@ -52,7 +52,13 @@ class ServerNetwork(Networking):
         s.listen(5)
 
         while True:
-            client, addr = s.accept()
+            try:
+                client, addr = s.accept()
+            except ConnectionAbortedError:
+                logging.debug("Accept Socket: Connection Aborted")
+                return
+            except Exception as e:
+                logging.debug(e.message)
             client.setblocking(0)
             str_addr = str(addr[0]) + ":" +  str(addr[1])
             logging.info("Adding Client: " + str_addr)
@@ -63,7 +69,6 @@ class ServerNetwork(Networking):
     def _execute_send(self, s_dict, d_lock, s_queue):
         while True:
             if not s_queue.empty():
-                print("Sending")
                 addr, msg_to_send = s_queue.get()
                 s_queue.task_done()
                 d_lock.acquire()
@@ -110,13 +115,19 @@ class ServerNetwork(Networking):
         logging.info("Cleaning Up Sockets")
         self._thread_lock.acquire()
         for key, s in self._socket_dict.items():
-            s.shutdown(socket.SHUT_RDWR)
+            try:
+                s.shutdown(socket.SHUT_RDWR)
+            except:
+                logging.info("Socket(" + key + "): Not Connected ")
         logging.info("Successful Socket Cleanup")
         self._accept_s.close()
         self._thread_lock.release()
 
-    def __del__(self):
+    def shutdown(self):
         self._socket_cleanup()
+
+    def __del__(self):
+        self.shutdown()
 
 def main():
     n = ServerNetwork()
