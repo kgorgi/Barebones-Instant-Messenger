@@ -33,7 +33,7 @@ class TestRoom(unittest.TestCase):
 		rm.add_user("ad2","alB")
 		self.assertFalse(rm.remove_user("ad3","alC"))
 		
-	def test_get_AddressList(self):
+	def test_get_address_list(self):
 		rm = Room("ad1","al1","newRoom")
 		compare = ["ad1"]
 		for i in range(2,45):
@@ -42,6 +42,16 @@ class TestRoom(unittest.TestCase):
 			rm.add_user(ad,al)
 			compare.append(ad)
 		self.assertEqual(rm.get_address_list(),compare)
+
+	def test_get_alias_list(self):
+		rm = Room("ad1", "al1", "newRoom")
+		compare = ["al1"]
+		for i in range(45, 90):
+			ad = "ad" + str(i)
+			al = "al" + str(i)
+			rm.add_user(ad, al)
+			compare.append(al)
+		self.assertEqual(rm.get_alias_list(), compare)
 
 if __name__=='__main__':
 	unittest.main()
