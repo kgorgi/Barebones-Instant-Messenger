@@ -3,10 +3,12 @@ from chatmanager.room import Room
 from snet.socket_server import ServerNetwork
 
 class ChatManager:
+	_host = "127.0.0.1"
+	_port = 8000
 
 	def __init__(self):
 		self._rooms = {}
-		self._network = ServerNetwork()
+		self._network = ServerNetwork(self._host, self._port)
 	
 	"""
 		JSON form:

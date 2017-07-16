@@ -8,12 +8,14 @@ import logging
 from snet.snet_interface import Networking
 
 class ServerNetwork(Networking):
-    _host = "127.0.0.1" #socket.gethostname()
-    _port = 8000
 
-    def __init__(self):
+    def __init__(self, address, port):
         logging.basicConfig(level=logging.INFO)
         logging.info("Starting Server Networking")
+
+        self._host = address
+        self._port = port
+
 
         self._socket_dict = dict()
         self._accept_s = socket.socket()
@@ -57,8 +59,8 @@ class ServerNetwork(Networking):
             except ConnectionAbortedError:
                 logging.debug("Accept Socket: Connection Aborted")
                 return
-            except Exception as e:
-                logging.debug(e.message)
+            except OSError as e:
+                logging.debug("Accept Socket: OS Error")
             client.setblocking(0)
             str_addr = str(addr[0]) + ":" +  str(addr[1])
             logging.info("Adding Client: " + str_addr)
@@ -130,7 +132,7 @@ class ServerNetwork(Networking):
         self.shutdown()
 
 def main():
-    n = ServerNetwork()
+    n = ServerNetwork("127.0.0.1", 8000)
     input("Press a key to exit\n")
 
 if __name__ == "__main__":
