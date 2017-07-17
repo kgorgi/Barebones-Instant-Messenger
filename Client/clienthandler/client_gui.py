@@ -75,11 +75,13 @@ message_text['state'] = DISABLED
 #recieve func
 def recieve():
     if main_view.visible == True:
-        new_message = chat_handler.update()
-        message_text['state'] = NORMAL
-        message_text.insert(INSERT,"\n%s" % new_message)
-        message_text['state'] = DISABLED
-    root.after(500, recieve)
+        new_message = client_handler.update()
+        if new_message is not None:
+            message_text['state'] = NORMAL
+            message_text.insert(INSERT,"\n%s" % new_message)
+            message_text['state'] = DISABLED
+            message_text.see(END)
+    root.after(250, recieve)
 
 def login(method):
 	#send data
@@ -89,10 +91,9 @@ def login(method):
     if method == "join":
         error_code = client_handler.join_room(chatroom_entry.get(), alias_entry.get())
     elif method == "create":
-        error_code = client_handler.join_room(chatroom_entry.get(), alias_entry.get())
+        error_code = client_handler.create_room(chatroom_entry.get(), alias_entry.get())
 	
 	# returned error code
-    error_code = 0
     error_message = StringVar()
     error = Message(user_setup, bg = 'red',font=('times', 24, 'bold'), textvariable=error_message)
     if error_code != 0:
@@ -134,13 +135,13 @@ def send_enter(event):
 	
 def leave():
 	#func to leave
-    client_handler.leave()
+    client_handler.leave_room()
     raise_frame(user_setup)
     main_view.visible = False
 	
 def on_closing():
 	#input function to leave
-    client_handler.leave()
+    client_handler.leave_room()
     print("goodbye")
     root.destroy()
 
@@ -148,5 +149,5 @@ def on_closing():
 raise_frame(user_setup)
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.bind('<Return>', send_enter)
-root.after(500, recieve)
+root.after(250, recieve)
 root.mainloop()

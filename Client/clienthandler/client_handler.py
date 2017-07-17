@@ -10,7 +10,7 @@ class ClientHandler(ClientBackend):
     SUCCESS = "0"
 
     def __init__(self):
-        self._networkService = ClientNetworking(socket.gethostname(), 8000)
+        self._networkService = ClientNetworking("134.87.139.78", 8000)
         self.room_name = ""
         self.alias_name = ""
         self.messages = []
@@ -20,8 +20,8 @@ class ClientHandler(ClientBackend):
         join = {
             "command": "J",
             "alias": alias,
-            "address": room_name,
-			"room": self.client_address,
+            "address": self.client_address,
+			"room": room_name,
 			"message": None
 		}
 
@@ -38,12 +38,12 @@ class ClientHandler(ClientBackend):
 
         return int(server_feedback)
 		
-    def create_room(self,room_name, alias):
+    def create_room(self,r_name, alias):
         create = {
 			"command": "C",
 			"alias": alias,
-			"address": room_name,
-			"room": self.client_address,
+            "address": self.client_address,
+            "room": r_name,
 			"message": None
 		}
 
@@ -55,7 +55,7 @@ class ClientHandler(ClientBackend):
             server_feedback = self._networkService.receive_next_message()
 
         if server_feedback is self.SUCCESS:
-            self.room_name = room_name
+            self.room_name = r_name
             self.alias_name = alias
 
         return int(server_feedback)
@@ -65,8 +65,8 @@ class ClientHandler(ClientBackend):
         leave = {
 			"command": "L",
 			"alias": self.alias_name,
-			"address": self.room_name,
-			"room": self.client_address,
+            "address": self.client_address,
+            "room": self.room_name,
 			"message": None
 		}
 
@@ -81,9 +81,9 @@ class ClientHandler(ClientBackend):
         message = {
 			"command": "S",
 			"alias": None,
-			"address": None,
-			"room": self.client_address,
-			"message": msg
+			"address": self.client_address,
+			"room": self.room_name,
+			"message": self.alias_name + ": " + msg
 		}
 
         message_json = json.dumps(message)
