@@ -54,6 +54,7 @@ class ChatManager:
 		else:
 			logging.debug("Invalid command:" + cmd["command"])
 			return False
+		return True
 
 	#Main Handling Logic of ChatManager
 	def run(self):

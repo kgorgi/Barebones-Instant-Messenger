@@ -11,56 +11,75 @@ class TestChatManager(unittest.TestCase):
         del self.cm
 
     def test_parser(self):
-        jsin= '{"command": "a","alias": "b","address": "c","room": "d","message": null}'
+        jsin = '{"command": "a","alias": "b","address": "c","room": "d","message": null}'
         ans = {"command": "a","alias": "b","address": "c","room": "d","message": None}
         self.assertEqual(self.cm._parse_incoming(jsin), ans)
 
-    def test__execute_cmd(self):
-        jsin='{"command": "C","alias": "b","address": "c","room": "d","message": null}'
-        cmd=self.cm._parse_incoming(jsin)
-        self.assertTrue(self.cm._execute_cmd(cmd))
+
+    def test__execute_invalid_cmd(self):
+        cmd = self.create_command("Q", "b", "c", "d", None)
+        self.assertFalse(self.cm._execute_cmd(cmd))
+
 
     def test_create_room(self):
-        jsin='{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-        cmd=self.cm._parse_incoming(jsin)
-        self.assertTrue(self.cm._execute_cmd(cmd))
+        cmd = self.create_command(None, "Goh", "1234", "RoomTest", None)
+        self.cm.create_room(cmd)
         self.assertEqual(self.cm.get_room("RoomTest").get_name(),"RoomTest")
 
     def test_create_existing_room(self):
-        jsin = '{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-        cmd = self.cm._parse_incoming(jsin)
-        self.cm._execute_cmd(cmd)
-        self.assertFalse(self.cm._execute_cmd(cmd))
+        cmd = self.create_command(None, "Goh", "address", "RoomTest", None)
+        self.cm.create_room(cmd)
+        self.assertFalse(self.cm.create_room(cmd))
 
     def test_join_room(self):
-        jsin = '{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-        cmd = self.cm._parse_incoming(jsin)
-        self.cm._execute_cmd(cmd)
-        jsin = '{"command": "J","alias": "Goh2","address": "1234","room": "RoomTest","message": null}'
-        cmd = self.cm._parse_incoming(jsin)
-        self.assertEqual(self.cm._execute_cmd(cmd),True)
+        cmd = self.create_command(None, "Goh", "1234", "RoomTest", None)
+        self.cm.create_room(cmd)
+
+        cmd2 = self.create_command(None, "Goh2", "12345", "RoomTest", None)
+        self.cm.join_room(cmd2)
+
         self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh","Goh2"])
+        self.assertEqual(self.cm.get_room("RoomTest").get_address_list(), ["1234", "12345"])
 
     def test_join_room_with_existing_alias(self):
-        jsin = '{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-        cmd = self.cm._parse_incoming(jsin)
-        self.cm._execute_cmd(cmd)
-        jsin = '{"command": "J","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-        cmd = self.cm._parse_incoming(jsin)
-        self.assertFalse(self.cm._execute_cmd(cmd),"User Exists")
+        cmd = self.create_command(None, "Goh", "1234", "RoomTest", None)
+        self.cm.create_room(cmd)
+
+        cmd2 = self.create_command(None, "Goh", "1234", "RoomTest", None)
+
+        self.assertEqual(self.cm.join_room(cmd2),1)
         self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh"])
 
     def test_leave_room(self):
-        jsin = '{"command": "C","alias": "Goh","address": "1234","room": "RoomTest","message": null}'
-        cmd = self.cm._parse_incoming(jsin)
-        self.cm._execute_cmd(cmd)
-        jsin = '{"command": "J","alias": "Goh2","address": "1234","room": "RoomTest","message": null}'
-        cmd = self.cm._parse_incoming(jsin)
-        self.cm._execute_cmd(cmd)
-        jsin = '{"command": "L","alias": "Goh2","address": "1234","room": "RoomTest","message": null}'
-        cmd = self.cm._parse_incoming(jsin)
-        self.assertEqual(self.cm._execute_cmd(cmd),True)
+        cmd = self.create_command(None, "Goh", "1234", "RoomTest", None)
+        self.cm.create_room(cmd)
+
+        cmd2 = self.create_command(None, "Goh2", "12345", "RoomTest", None)
+        self.cm.join_room(cmd2)
+
+        self.cm.leave_room(cmd2)
+
         self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh"])
+
+    def create_command(self, command, alias, address, room, message):
+        d = dict()
+
+        if command is not None:
+            d["command"] = command
+
+        if alias is not None:
+            d["alias"] = alias
+
+        if address is not None:
+            d["address"] = address
+
+        if room is not None:
+            d["room"] = room
+
+        if message is not None:
+            d["message"] = message
+
+        return d
 
 if __name__=='__main__':
     unittest.main()
