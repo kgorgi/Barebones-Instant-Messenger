@@ -1,7 +1,6 @@
 import time
 import unittest
 from chatmanager.chat_manager import ChatManager
-from chatmanager.room import Room
 
 class TestChatManager(unittest.TestCase):
     def setUp(self):
