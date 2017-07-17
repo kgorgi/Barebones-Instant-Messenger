@@ -5,7 +5,7 @@ from clienthandler.client_handler import ClientHandler
 def raise_frame(frame):
     frame.tkraise()
 
-#client_handler = ClientHandler()
+client_handler = ClientHandler()
 
 #create initial window
 root = Tk()
@@ -72,70 +72,81 @@ message_text.insert(INSERT, "You are in a chatroom -_-")
 message_text['state'] = DISABLED
 
 
+#recieve func
+def recieve():
+    if main_view.visible == True:
+        new_message = chat_handler.update()
+        message_text['state'] = NORMAL
+        message_text.insert(INSERT,"\n%s" % new_message)
+        message_text['state'] = DISABLED
+    root.after(500, recieve)
+
 def login(method):
 	#send data
 	#receive error code
 	#if good
 
-
+    if method == "join":
+        error_code = client_handler.join_room(chatroom_entry.get(), alias_entry.get())
+    elif method == "create":
+        error_code = client_handler.join_room(chatroom_entry.get(), alias_entry.get())
 	
 	# returned error code
-	error_code = 0
-	error_message = StringVar()
-	error = Message(user_setup, bg = 'red',font=('times', 24, 'bold'), textvariable=error_message)
-	if error_code != 0:
-		if error_code == 1:
-			error_message.set("Alias Taken")
-			error.place(x=300, y = 280)
-			return None
-		elif error_code == 2:
-			error_message.set("Chatroom Name Taken")
-			error.place(x=300, y = 280)
-			return None
-		elif error_code == 2:
-			error_message.set("Chatroom Does not Exist")
-			error.place(x=300, y = 280)
-			return None
-		elif error_code == 3:
-			error_message.set("No Connection To Internet")
-			error.place(x=300, y = 280)
-			return None
+    error_code = 0
+    error_message = StringVar()
+    error = Message(user_setup, bg = 'red',font=('times', 24, 'bold'), textvariable=error_message)
+    if error_code != 0:
+        if error_code == 1:
+            error_message.set("Alias Taken")
+            error.place(x=300, y = 280)
+            return None
+        elif error_code == 2:
+            error_message.set("Chatroom Name Taken")
+            error.place(x=300, y = 280)
+            return None
+        elif error_code == 3:
+            error_message.set("Chatroom Does not Exist")
+            error.place(x=300, y = 280)
+            return None
+        elif error_code == 4:
+            error_message.set("No Connection To Internet")
+            error.place(x=300, y = 280)
+            return None
 
 
 	#go to main_view and show text display frame
-	raise_frame(main_view)
-	main_view.visible = True
-	raise_frame(scrolling_text)
+    raise_frame(main_view)
+    main_view.visible = True
+    raise_frame(scrolling_text)
 	
 def send():
 	#input func to send message
-	message_text['state'] = NORMAL
-	message_text.insert(INSERT,"\n%s" % message_entry.get())
-	message_text['state'] = DISABLED
-	message_text.see(END)
-	message_entry.delete(0, END)
+    client_handler.send_message(message_entry.get())
+    message_text.see(END)
+    message_entry.delete(0, END)
 	
 def send_enter(event):
-	if main_view.visible == True:
+    if main_view.visible == True:
 		#input func to send message
-		message_text['state'] = NORMAL
-		message_text.insert(INSERT,"\n%s" % message_entry.get())
-		message_text['state'] = DISABLED
-		message_text.see(END)
-		message_entry.delete(0, END)
+        client_handler.send_message(message_entry.get())
+        message_text.see(END)
+        message_entry.delete(0, END)
 	
 def leave():
-	#func to leave 
-	raise_frame(user_setup)
-	main_view.visible = False
+	#func to leave
+    client_handler.leave()
+    raise_frame(user_setup)
+    main_view.visible = False
 	
 def on_closing():
 	#input function to leave
-	print("goodbye")
-	root.destroy()
+    client_handler.leave()
+    print("goodbye")
+    root.destroy()
 
 
 raise_frame(user_setup)
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.bind('<Return>', send_enter)
+root.after(500, recieve)
 root.mainloop()
