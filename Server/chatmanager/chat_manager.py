@@ -4,7 +4,7 @@ from chatmanager.room import Room
 from snet.socket_server import ServerNetwork
 
 class ChatManager:
-	_host = "134.87.139.78"
+	_host = "127.0.0.1"
 	_port = 8000
 
 	def __init__(self):
