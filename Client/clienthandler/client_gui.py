@@ -46,6 +46,10 @@ join_button.place(x=200, y=220)
 create_button = Button(user_setup, text="Create Chatroom",highlightbackground='blue', command=lambda: login("create"))
 create_button.place(x=400, y=220)
 
+#error message to later be set
+error_message = StringVar()
+error = Message(user_setup, bg = 'red',font=('times', 24, 'bold'), textvariable=error_message)
+
 #main_view widgets initialization
 message = StringVar()
 message_entry = Entry(main_view,highlightbackground='black', width = 70, textvariable=message)
@@ -92,10 +96,9 @@ def login(method):
         error_code = client_handler.join_room(chatroom_entry.get(), alias_entry.get())
     elif method == "create":
         error_code = client_handler.create_room(chatroom_entry.get(), alias_entry.get())
-	
+
+    error.place_forget()
 	# returned error code
-    error_message = StringVar()
-    error = Message(user_setup, bg = 'red',font=('times', 24, 'bold'), textvariable=error_message)
     if error_code != 0:
         if error_code == 1:
             error_message.set("Alias Taken")
@@ -114,6 +117,7 @@ def login(method):
             error.place(x=300, y = 280)
             return None
 
+    error.place_forget()
 
 	#go to main_view and show text display frame
     raise_frame(main_view)
@@ -135,6 +139,12 @@ def send_enter(event):
 	
 def leave():
 	#func to leave
+    #delete text of prior chatroom
+    message_text['state'] = NORMAL
+    message_text.delete('29.0', END)
+    message_text['state'] = DISABLED
+    
+    #leave room and return to starting page
     client_handler.leave_room()
     raise_frame(user_setup)
     main_view.visible = False
