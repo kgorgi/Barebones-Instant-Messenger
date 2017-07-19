@@ -29,7 +29,7 @@ class ClientHandler(ClientBackend):
         self._networkService.send_message(join_json)
 		
         server_feedback = None
-        while server_feedback is None:
+        while server_feedback is None or len(server_feedback) != 1:
             server_feedback = self._networkService.receive_next_message()
         
         server_feedback = server_feedback.rstrip(" ")

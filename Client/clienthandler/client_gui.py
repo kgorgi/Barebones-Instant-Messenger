@@ -26,6 +26,12 @@ scrolling_text.place(x = 10, y = 10)
 root.title("ChatClient")
 
 #user_setup widgets initialized
+
+#limit character to N function
+def limit_entry_size(limited_text, N):
+    if len(limited_text.get()) > N:
+        limited_text.set(limited_text.get()[:N])
+
 chatroom = StringVar()
 chatroom_entry = Entry(user_setup,highlightbackground='black', textvariable=chatroom)
 chatroom_entry.place(x=200, y=170)
@@ -33,6 +39,9 @@ chatroom_entry.place(x=200, y=170)
 alias = StringVar()
 alias_entry = Entry(user_setup,highlightbackground='black', textvariable=alias)
 alias_entry.place(x=400, y=170)
+
+alias.trace('w', lambda *args: limit_entry_size(alias, 15))
+chatroom.trace('w', lambda *args: limit_entry_size(chatroom, 15))
 
 chatroom_label = Label(user_setup, bg='blue', text = "Enter Chatroom")
 chatroom_label.place(x=200, y=200)
@@ -54,6 +63,8 @@ error = Message(user_setup, bg = 'red',font=('times', 24, 'bold'), textvariable=
 message = StringVar()
 message_entry = Entry(main_view,highlightbackground='black', width = 70, textvariable=message)
 message_entry.place(x=10, y=450)
+
+message.trace('w', lambda *args: limit_entry_size(message, 140))
 
 send_button = Button(main_view, text="Send Message", highlightbackground='blue', command=lambda: send())
 send_button.place(x=670, y = 450)
