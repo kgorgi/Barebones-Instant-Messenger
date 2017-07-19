@@ -6,7 +6,7 @@ from cnet.socket_client import ClientNetworking
 
 class ClientHandler(ClientBackend):
 
-    #Server feedback codes
+    #Server feedback codes do this devlyn
     SUCCESS = "0"
 
     def __init__(self):
@@ -17,15 +17,7 @@ class ClientHandler(ClientBackend):
         self.client_address = self._networkService.get_local_address()
 
     def join_room(self, room_name, alias):
-        join = {
-            "command": "J",
-            "alias": alias,
-            "address": self.client_address,
-			"room": room_name,
-			"message": None
-		}
-
-        join_json = json.dumps(join)
+        join_json = self.create_instruction("J", alias, room_name, None)
         self._networkService.send_message(join_json)
 		
         server_feedback = None
@@ -41,15 +33,7 @@ class ClientHandler(ClientBackend):
         return int(server_feedback)
 		
     def create_room(self,r_name, alias):
-        create = {
-			"command": "C",
-			"alias": alias,
-            "address": self.client_address,
-            "room": r_name,
-			"message": None
-		}
-
-        create_json = json.dumps(create)
+        create_json = self.create_instruction("C", alias, r_name, None)
         self._networkService.send_message(create_json)
 		
         server_feedback = None
@@ -65,29 +49,11 @@ class ClientHandler(ClientBackend):
         return int(server_feedback)
 		
     def leave_room(self):
-
-        leave = {
-			"command": "L",
-			"alias": self.alias_name,
-            "address": self.client_address,
-            "room": self.room_name,
-			"message": None
-		}
-
-        leave_json = json.dumps(leave)
+        leave_json = self.create_instruction("L", self.alias_name, self.room_name, None)
         self._networkService.send_message(leave_json)
 
     def quit(self):
-
-        quit = {
-            "command": "Q",
-            "alias": self.alias_name,
-            "address": self.client_address,
-            "room": self.room_name,
-            "message": None
-        }
-
-        quit_json = json.dumps(quit)
+        quit_json = self.create_instruction("Q", self.alias_name, self.room_name, None)
         self._networkService.send_message(quit_json)
 
 
@@ -101,15 +67,21 @@ class ClientHandler(ClientBackend):
         return new_message
 
     def send_message(self, msg):
-        message = {
-			"command": "S",
-			"alias": None,
-			"address": self.client_address,
-			"room": self.room_name,
-			"message": self.alias_name + ": " + msg
-		}
-
-        message_json = json.dumps(message)
+        message_json = self.create_instruction("S", self.alias_name, self.room_name, self.alias_name + ": " + msg)
         msg_length= len(message_json)
         message_json = message_json + ' ' * (280 - msg_length)
         self._networkService.send_message(message_json)
+
+    def create_instruction(self, command, alias, room, msg):
+        message = {
+            "command": command,
+            "alias": alias,
+            "address": self.client_address,
+            "room": room,
+            "message": msg
+        }
+
+        message_json = json.dumps(message)
+        return message_json
+
+
