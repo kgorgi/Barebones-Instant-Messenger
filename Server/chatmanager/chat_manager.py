@@ -27,6 +27,7 @@ class ChatManager:
 	"""
 
 	def _parse_incoming(self, in_json):
+		trimmed_json = in_json.rstrip(" ")
 		cmd_data = json.loads(in_json)
 
 		for item in cmd_data:

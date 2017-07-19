@@ -71,22 +71,21 @@ class ServerNetwork(Networking):
 
     def _execute_send(self, s_dict, d_lock, s_queue):
         while True:
-            if not s_queue.empty():
-                addr, msg_to_send = s_queue.get()
-                s_queue.task_done()
-                d_lock.acquire()
-                s_dict[addr].send(msg_to_send.encode("utf-8"))
-                d_lock.release()
-                logging.info("Sent(" + addr + "): " + msg_to_send)
-            else:
-                time.sleep(1)
+            addr, msg_to_send = s_queue.get()
+            s_queue.task_done()
+            msg_length = len(msg_to_send)
+            msg_to_send = msg_to_send + ' ' * (280 - msg_length)
+            #d_lock.acquire() Will need for when deleting sockets
+            s_dict[addr].send(msg_to_send.encode("utf-8"))
+            #d_lock.release()
+            logging.info("Sent(" + addr + "): " + msg_to_send)
 
     def _exceute_receive(self, s_dict, d_lock, r_queue):
         while True:
             d_lock.acquire()
             for key, s in s_dict.items():
                 try:
-                    msg = s.recv(4096)
+                    msg = s.recv(280)
                     if len(msg) != 0:
                         msg = msg.decode("utf-8")
                         logging.info("Received(" + key + "): " + msg)
@@ -98,7 +97,7 @@ class ServerNetwork(Networking):
                     else:
                         logging.debug(str(e))
             d_lock.release()
-            time.sleep(1)
+            time.sleep(0.050)
 
     def send_response(self, address, response):
         e = (address, response)

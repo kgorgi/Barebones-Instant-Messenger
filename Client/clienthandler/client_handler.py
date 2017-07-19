@@ -10,7 +10,7 @@ class ClientHandler(ClientBackend):
     SUCCESS = "0"
 
     def __init__(self):
-        self._networkService = ClientNetworking("134.87.139.78", 8000)
+        self._networkService = ClientNetworking("127.0.0.1", 8000)
         self.room_name = ""
         self.alias_name = ""
         self.messages = []
@@ -31,7 +31,9 @@ class ClientHandler(ClientBackend):
         server_feedback = None
         while server_feedback is None:
             server_feedback = self._networkService.receive_next_message()
-
+        
+        server_feedback = server_feedback.rstrip(" ")
+        
         if server_feedback is self.SUCCESS:
             self.room_name = room_name
             self.alias_name = alias
@@ -53,6 +55,8 @@ class ClientHandler(ClientBackend):
         server_feedback = None
         while server_feedback is None:
             server_feedback = self._networkService.receive_next_message()
+        
+        server_feedback = server_feedback.rstrip(" ")
 
         if server_feedback is self.SUCCESS:
             self.room_name = r_name
@@ -75,6 +79,8 @@ class ClientHandler(ClientBackend):
 
     def update(self):
         new_message = self._networkService.receive_next_message()
+        if not new_message is None:
+            new_message = new_message.rstrip(" ")
         return new_message
 
     def send_message(self, msg):
@@ -87,4 +93,6 @@ class ClientHandler(ClientBackend):
 		}
 
         message_json = json.dumps(message)
+        msg_length= len(message_json)
+        message_json = message_json + ' ' * (280 - msg_length)
         self._networkService.send_message(message_json)

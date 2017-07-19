@@ -82,10 +82,10 @@ def recieve():
         new_message = client_handler.update()
         if new_message is not None:
             message_text['state'] = NORMAL
-            message_text.insert(INSERT,"\n%s" % new_message)
+            message_text.insert(END,"\n%s" % new_message)
             message_text['state'] = DISABLED
             message_text.see(END)
-    root.after(250, recieve)
+    root.after(150, recieve)
 
 def login(method):
 	#send data
@@ -159,5 +159,5 @@ def on_closing():
 raise_frame(user_setup)
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.bind('<Return>', send_enter)
-root.after(250, recieve)
+root.after(150, recieve)
 root.mainloop()

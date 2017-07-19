@@ -59,17 +59,13 @@ class ClientNetworking(Networking):
 
     def execute_send(self, s, lock_s ,s_queue):
         while True:
-            if not s_queue.empty():
-                msg_to_send = s_queue.get()
-                s_queue.task_done()
-                logging.info("Sending message: " + "\"" + msg_to_send+ "\"")
-                lock_s.acquire()
-                s.send(msg_to_send.encode('utf-8'))
-                lock_s.release()
-            else:
-                pass
-                #Wait a bit before you check again
-                time.sleep(0.05)
+            msg_to_send = s_queue.get()
+            s_queue.task_done()
+            logging.info("Sending message: " + "\"" + msg_to_send+ "\"")
+            #lock_s.acquire()
+            s.send(msg_to_send.encode('utf-8'))
+            #lock_s.release()
+            #Wait a bit before you check again
 
     def receive_next_message(self):
         if not self.received_msg_queue.empty():
@@ -79,7 +75,7 @@ class ClientNetworking(Networking):
     def execute_receive(self, s, lock_r , r_queue):
         while True:
             try:
-                msg_received = s.recv(4096)
+                msg_received = s.recv(280)
                 if len(msg_received) != 0:
                     msg_received = msg_received.decode("utf-8")
                     r_queue.put(msg_received)
@@ -92,7 +88,7 @@ class ClientNetworking(Networking):
                     logging.debug("ERROR: " + str(e))
                     break
 
-            time.sleep(1)
+            time.sleep(0.050)
 
     def shutdown(self):
         logging.info("ClientNetworking Shutting Down")
