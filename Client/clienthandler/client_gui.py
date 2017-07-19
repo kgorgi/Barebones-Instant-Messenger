@@ -10,11 +10,11 @@ client_handler = ClientHandler()
 #create initial window
 root = Tk()
 root.geometry("800x500")
-root.configure(background='blue')
+root.configure(background='#c53fff')
 
 #create and set frames
-user_setup = Frame(root, height = 500, width = 800, background='blue')
-main_view = Frame(root, height = 500, width = 800, background= 'blue')
+user_setup = Frame(root, height = 500, width = 800, background='#c53fff')
+main_view = Frame(root, height = 500, width = 800, background= '#c53fff')
 scrolling_text = Frame(root, height = 420, width = 700)
 
 main_view.visible = False
@@ -43,16 +43,18 @@ alias_entry.place(x=400, y=170)
 alias.trace('w', lambda *args: limit_entry_size(alias, 15))
 chatroom.trace('w', lambda *args: limit_entry_size(chatroom, 15))
 
-chatroom_label = Label(user_setup, bg='blue', text = "Enter Chatroom")
-chatroom_label.place(x=200, y=200)
+chatroom_label = Label(user_setup, bg='#c53fff', text = "Enter Chatroom")
+chatroom_label.place(x=200, y=140)
+chatroom_label.config(font=("Courier", 21, 'bold'))
 
-alias_label = Label(user_setup, bg='blue', text = "Enter Alias")
-alias_label.place(x=400, y=200)
+alias_label = Label(user_setup, bg='#c53fff', text = "Enter Alias")
+alias_label.place(x=400, y=140)
+alias_label.config(font=("Courier", 21, 'bold'))
 		
-join_button = Button(user_setup, text="Join Chatroom",highlightbackground='blue', command=lambda: login("join"))
+join_button = Button(user_setup, text="Join Chatroom",highlightbackground='#c53fff', command=lambda: login("join"))
 join_button.place(x=200, y=220)
 		
-create_button = Button(user_setup, text="Create Chatroom",highlightbackground='blue', command=lambda: login("create"))
+create_button = Button(user_setup, text="Create Chatroom",highlightbackground='#c53fff', command=lambda: login("create"))
 create_button.place(x=400, y=220)
 
 #error message to later be set
@@ -66,11 +68,14 @@ message_entry.place(x=10, y=450)
 
 message.trace('w', lambda *args: limit_entry_size(message, 140))
 
-send_button = Button(main_view, text="Send Message", highlightbackground='blue', command=lambda: send())
+send_button = Button(main_view, text="Send Message", highlightbackground='#c53fff', command=lambda: send())
 send_button.place(x=670, y = 450)
 
-leave_button = Button(main_view, text="Leave", highlightbackground='blue', command=lambda: leave())
+leave_button = Button(main_view, text="Leave", highlightbackground='#c53fff', command=lambda: leave())
 leave_button.place(x=720, y = 10)
+
+#leave_image = PhotoImage(file="clienthandler/door.png")
+#leave_button.config(image=leave_image)
 
 message_text = Text(scrolling_text, width =90, height =28)
 message_text.grid(row=0, column=0)
@@ -162,7 +167,7 @@ def leave():
 	
 def on_closing():
 	#input function to leave
-    client_handler.leave_room()
+    client_handler.quit()
     print("goodbye")
     root.destroy()
 
