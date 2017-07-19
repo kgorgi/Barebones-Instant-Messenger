@@ -4,7 +4,7 @@ from chatmanager.room import Room
 from snet.socket_server import ServerNetwork
 
 class ChatManager:
-	_host = "127.0.0.1"
+	_host = "134.87.147.243"
 	_port = 8000
 
 	def __init__(self):
@@ -95,6 +95,10 @@ class ChatManager:
 		if not current_room.add_user(cmd["address"],cmd["alias"]):
 			return 1 #Alias Already Exists
 
+
+		copy = cmd.copy()
+		copy["message"] = "The user "+ copy["alias"] + " joined the room"
+		self.send_message(copy)
 		return 0 #Success
 		
 	def leave_room(self,cmd):
@@ -111,6 +115,10 @@ class ChatManager:
 		if current_room.is_empty():
 			logging.info("ChatManager: Removing Room (" + cmd["room"] + ")")
 			self._rooms.pop(cmd["room"])
+
+		copy = cmd.copy()
+		copy["message"] = "The user " + copy["alias"] + " left the room"
+		self.send_message(copy)
 		
 	def send_message(self,cmd):
 		logging.info("ChatManager: Send message")

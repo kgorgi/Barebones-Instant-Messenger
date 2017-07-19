@@ -10,7 +10,7 @@ class ClientHandler(ClientBackend):
     SUCCESS = "0"
 
     def __init__(self):
-        self._networkService = ClientNetworking("127.0.0.1", 8000)
+        self._networkService = ClientNetworking("134.87.147.243", 8000)
         self.room_name = ""
         self.alias_name = ""
         self.messages = []
@@ -77,10 +77,27 @@ class ClientHandler(ClientBackend):
         leave_json = json.dumps(leave)
         self._networkService.send_message(leave_json)
 
+    def quit(self):
+
+        quit = {
+            "command": "Q",
+            "alias": self.alias_name,
+            "address": self.client_address,
+            "room": self.room_name,
+            "message": None
+        }
+
+        quit_json = json.dumps(quit)
+        self._networkService.send_message(quit_json)
+
+
+
     def update(self):
         new_message = self._networkService.receive_next_message()
         if not new_message is None:
             new_message = new_message.rstrip(" ")
+
+
         return new_message
 
     def send_message(self, msg):
