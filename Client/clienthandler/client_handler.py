@@ -24,7 +24,7 @@ class ClientHandler(ClientBackend):
         while server_feedback is None:
             server_feedback = self._networkService.receive_next_message()
         
-        server_feedback = server_feedback.rstrip(" ")
+        server_feedback = server_feedback
         
         if server_feedback is self.SUCCESS:
             self.room_name = room_name
@@ -40,7 +40,7 @@ class ClientHandler(ClientBackend):
         while server_feedback is None:
             server_feedback = self._networkService.receive_next_message()
         
-        server_feedback = server_feedback.rstrip(" ")
+        server_feedback = server_feedback
 
         if server_feedback is self.SUCCESS:
             self.room_name = r_name
@@ -66,7 +66,7 @@ class ClientHandler(ClientBackend):
     def update(self):
         new_message = self._networkService.receive_next_message()
         if not new_message is None:
-            new_message = new_message.rstrip(" ")
+            new_message = new_message
 
 
         return new_message

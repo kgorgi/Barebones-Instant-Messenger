@@ -14,13 +14,15 @@ def main():
 	name=str(sys.argv[2])
 	
 	client.create_room(room,name)
-	
+	"""
 	for i in range(40):
 		client.send_message("Message from user " + name)
 		time.sleep(delay)
 	
 	client.leave_room()
+	"""
 
+	time.sleep(120)
 
 
 if __name__=="__main__":

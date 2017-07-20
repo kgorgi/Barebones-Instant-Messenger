@@ -45,7 +45,7 @@ class ChatManager:
 		if response_code == 0:
 			copy = cmd.copy()
 			copy["message"] = "The user " + copy["alias"] + " joined the room."
-			self.send_message(copy)
+			#self.send_message(copy)
 
 	def _execute_cmd(self, cmd):
 		if(cmd["command"] == "C"): #Create

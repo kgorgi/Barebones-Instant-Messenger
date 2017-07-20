@@ -73,7 +73,7 @@ class ServerNetwork(Networking):
             delete_lock.acquire()
 
             s_dict[str_addr] = client
-
+            logging.info("Networking: " + str(len(s_dict)) + " Client(s) Connected")
             delete_lock.release()
             d_lock.release()
 
@@ -93,7 +93,10 @@ class ServerNetwork(Networking):
                 s_dict[addr].send(msg_to_send.encode("utf-8"))
             except KeyError:
                 #Socket Will Be Cleaned Up By Recieve Function, Just Log Error
-                logging.info("Networking: Invalid Address (" + addr + ")")
+                logging.debug("Networking: Invalid Address (" + addr + ")")
+            except BrokenPipeError:
+                logging.debug("Networking: Send Failure (" + addr + ") Broken Pipe Error")
+
             d_lock.release()
 
             logging.info("Sent(" + addr + "): " + msg_to_send)

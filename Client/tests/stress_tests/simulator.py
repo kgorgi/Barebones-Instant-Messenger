@@ -17,12 +17,15 @@ def main():
 	
 	client.join_room(room,name)
 	
+	"""
 	for i in range(5):
 		client.send_message("Message from user " + name)
 		time.sleep(delay)
 	
 	client.leave_room()
+	"""
 
+	time.sleep(120)
 
 
 if __name__=="__main__":

@@ -10,8 +10,6 @@ from cnet.cnet_interface import Networking
 
 class ClientNetworking(Networking):
 
-    update_speed = 0.050 #Seconds
-
     def __init__(self, address, port):
         self._successful_init = False
         logging.basicConfig(level=logging.DEBUG)
@@ -35,17 +33,14 @@ class ClientNetworking(Networking):
             logging.debug("Connection Failed")
             sys.exit(0)
 
-        self.client_socket.setblocking(0)
         logging.info("Successfully Connected")
 
-        self.thread_lock = threading.Lock()
-
-        args_send = (self.client_socket, self.thread_lock ,self.send_msg_queue)
+        args_send = (self.client_socket ,self.send_msg_queue)
         self.send_msg_thread = threading.Thread(target=self.execute_send, args= args_send)
         self.send_msg_thread.setDaemon(True)
         self.send_msg_thread.start()
 
-        args_receive = (self.client_socket, self.thread_lock, self.received_msg_queue)
+        args_receive = (self.client_socket, self.received_msg_queue)
         self.receive_msg_thread = threading.Thread(target=self.execute_receive, args=args_receive)
         self.receive_msg_thread.setDaemon(True)
         self.receive_msg_thread.start()
@@ -59,27 +54,25 @@ class ClientNetworking(Networking):
     def send_message(self, msg):
         self.send_msg_queue.put(msg)
 
-    def execute_send(self, s, lock_s ,s_queue):
+    def execute_send(self, s ,s_queue):
         while True:
             msg_to_send = s_queue.get()
             s_queue.task_done()
-            logging.info("Sending message: " + "\"" + msg_to_send+ "\"")
-            #lock_s.acquire()
+            logging.info("Sending message: " + "\"" + msg_to_send.rstrip(" ")+  "\"")
+
             s.send(msg_to_send.encode('utf-8'))
-            #lock_s.release()
-            #Wait a bit before you check again
 
     def receive_next_message(self):
         if not self.received_msg_queue.empty():
             return self.received_msg_queue.get()
         return None
 
-    def execute_receive(self, s, lock_r , r_queue):
+    def execute_receive(self, s , r_queue):
         while True:
             try:
                 msg_received = s.recv(280)
                 if len(msg_received) != 0:
-                    msg_received = msg_received.decode("utf-8")
+                    msg_received = msg_received.decode("utf-8").rstrip(" ")
                     r_queue.put(msg_received)
                     logging.info("Received Message: " + "\"" +  msg_received + "\"")
             except socket.error as e:
@@ -90,15 +83,11 @@ class ClientNetworking(Networking):
                     logging.debug("ERROR: " + str(e))
                     break
 
-            time.sleep(self.update_speed)
-
     def shutdown(self):
         logging.info("ClientNetworking Shutting Down")
         if (self._successful_init):
             logging.info("Cleaning Up Socket")
-            self.thread_lock.acquire()
             self.client_socket.close()
-            self.thread_lock.release()
             logging.info("Successful Socket Cleanup")
 
     def __del__(self):
