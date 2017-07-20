@@ -71,12 +71,14 @@ class GUI:
 		message.trace('w', lambda *args: limit_entry_size(message, 140))
 
 		send_button = Button(main_view, text="Send Message", highlightbackground='#c53fff', command=lambda: send())
-		send_button.place(x=670, y = 450)
+		send_button.place(x=680, y = 420)
+		send_image = PhotoImage(file="clienthandler/mail.gif")
+		send_button.config(image=send_image)
 
-		leave_button = Button(main_view, text="Leave", highlightbackground='#c53fff', command=lambda: leave())
-		leave_button.place(x=720, y = 10)
+		leave_button = Button(main_view, text="Leave", highlightbackground='#c53fff', bd=0, command=lambda: leave())
+		leave_button.place(x=680, y = 10)
 
-		leave_image = PhotoImage(file="clienthandler/door.pgm")
+		leave_image = PhotoImage(file="clienthandler/door.gif")
 		leave_button.config(image=leave_image)
 
 		message_text = Text(scrolling_text, width =90, height =28)
