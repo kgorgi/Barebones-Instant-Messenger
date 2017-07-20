@@ -16,7 +16,7 @@ class Room:
         self._user_count += 1
         return True
 
-    def remove_user(self, address, alias):
+    def remove_user(self, address, alias = None):
         # Only deletes first instance of alias and address, doesn't check duplicates
         #Add ability to delete based only on address
         if address in self._address_list and alias in self._alias_list:
@@ -25,6 +25,17 @@ class Room:
             self._user_count -= 1
             return True
 
+        if address in self._address_list and alias is None:
+            i = self._address_list.index(address)
+            self._address_list.remove(address)
+            del self._alias_list[i]
+            return True
+
+        return False
+
+    def address_in_room(self, address):
+        if address in self._address_list:
+            return True
         return False
 
     def get_name(self):

@@ -5,6 +5,7 @@ import time
 import errno
 import atexit
 import logging
+import json
 from snet.snet_interface import Networking
 
 class ServerNetwork(Networking):
@@ -25,28 +26,29 @@ class ServerNetwork(Networking):
         self._smsgs_queue = queue.Queue()
 
         self._thread_lock = threading.Lock()
+        self._delete_thread_lock = threading.Lock()
 
         logging.info("Creating Accept Socket Thread")
-        accept_args = (self._accept_s, self._socket_dict, self._thread_lock)
+        accept_args = (self._accept_s, self._socket_dict, self._delete_thread_lock, self._thread_lock)
         self._accept_thread = threading.Thread(target = self._accept_sockets, args = accept_args )
         self._accept_thread.setDaemon(True)
         self._accept_thread.start()
 
-        logging.info("Creating Receive Messages Thread")
-        rmsgs_args = (self._socket_dict, self._thread_lock, self._rmsgs_queue)
-        self._rmsgs_thread = threading.Thread(target=self._exceute_receive, args=rmsgs_args)
-        self._rmsgs_thread.setDaemon(True)
-        self._rmsgs_thread.start()
-
         logging.info("Creating Send Messages Thread")
-        smsgs_args = (self._socket_dict, self._thread_lock, self._smsgs_queue)
+        smsgs_args = (self._socket_dict, self._delete_thread_lock, self._smsgs_queue)
         self._smsgs_thread = threading.Thread(target=self._execute_send, args=smsgs_args)
         self._smsgs_thread.setDaemon(True)
         self._smsgs_thread.start()
 
+        logging.info("Creating Receive Messages Thread")
+        rmsgs_args = (self._socket_dict, self._thread_lock, self._delete_thread_lock, self._rmsgs_queue)
+        self._rmsgs_thread = threading.Thread(target=self._exceute_receive, args=rmsgs_args)
+        self._rmsgs_thread.setDaemon(True)
+        self._rmsgs_thread.start()
+
         atexit.register(self.shutdown)
 
-    def _accept_sockets(self,s, s_dict, d_lock):
+    def _accept_sockets(self,s, s_dict, d_lock, delete_lock):
         server_address = (self._host, self._port)
         logging.info("Binding To: " + str(server_address))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -66,7 +68,9 @@ class ServerNetwork(Networking):
             str_addr = str(addr[0]) + ":" +  str(addr[1])
             logging.info("Adding Client: " + str_addr)
             d_lock.acquire()
+            delete_lock.acquire()
             s_dict[str_addr] = client
+            delete_lock.release()
             d_lock.release()
 
     def _execute_send(self, s_dict, d_lock, s_queue):
@@ -75,27 +79,61 @@ class ServerNetwork(Networking):
             s_queue.task_done()
             msg_length = len(msg_to_send)
             msg_to_send = msg_to_send + ' ' * (280 - msg_length)
-            #d_lock.acquire() Will need for when deleting sockets
-            s_dict[addr].send(msg_to_send.encode("utf-8"))
-            #d_lock.release()
-            logging.info("Sent(" + addr + "): " + msg_to_send)
+            d_lock.acquire()
+            try:
+                s_dict[addr].send(msg_to_send.encode("utf-8"))
+            except KeyError:
+                logging.info("Networking: Invalid Address (" + addr + ")")
+            d_lock.release()
+            logging.info("Sent(" + addr + "): " + msg_to_send.rstrip(""))
 
-    def _exceute_receive(self, s_dict, d_lock, r_queue):
+    def _exceute_receive(self, s_dict, d_lock, delete_lock, r_queue):
         while True:
             d_lock.acquire()
-            for key, s in s_dict.items():
+
+            for key in s_dict.keys():
+                s = s_dict[key]
                 try:
                     msg = s.recv(280)
                     if len(msg) != 0:
                         msg = msg.decode("utf-8")
-                        logging.info("Received(" + key + "): " + msg)
-                        self._rmsgs_queue.put(msg)
+                        logging.info("Received(" + key + "): " + msg.rstrip(" "))
+
+                        if msg[13] == "Q":
+                            #Client Shutdown
+                            logging.info("Networking: Closing Connection " + key)
+                            delete_lock.acquire()
+                            s.close()
+                            del s_dict[key]
+                            delete_lock.release()
+
+
+                        r_queue.put(msg)
+                        break
                 except socket.error as e:
                     err = e.args[0]
                     if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
                         continue
                     else:
-                        logging.debug(str(e))
+                        #Socket Error Close and Tell Client
+                        leave_command = {
+                            "command": "L",
+                            "alias": "",
+                            "address": key,
+                            "room": "",
+                            "message": ""
+                        }
+
+                        logging.info("Networking: Closing Connection " + key)
+                        delete_lock.acquire()
+                        s.close()
+                        del s_dict[key]
+                        delete_lock.release()
+
+                        create_json = json.dumps(leave_command)
+                        r_queue.put(create_json)
+                        break
+
             d_lock.release()
             time.sleep(0.050)
 

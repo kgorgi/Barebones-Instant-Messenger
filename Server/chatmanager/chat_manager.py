@@ -4,7 +4,7 @@ from chatmanager.room import Room
 from snet.socket_server import ServerNetwork
 
 class ChatManager:
-	_host = "134.87.147.243"
+	_host = "127.0.0.1"
 	_port = 8000
 
 	def __init__(self):
@@ -48,7 +48,7 @@ class ChatManager:
 			self.send_response(cmd["address"], result)
 		elif(cmd["command"] == "J"): #Join
 			self.send_response(cmd["address"], self.join_room(cmd))
-		elif(cmd["command"] == "L"): #Leave
+		elif(cmd["command"] == "L" or cmd["command"] == "Q"): #Leave
 			self.leave_room(cmd)
 		elif(cmd["command"] == "S"): #Send
 			self.send_message(cmd)
@@ -67,7 +67,6 @@ class ChatManager:
 
 				command = self._parse_incoming(next_msg)
 				if not self._execute_cmd(command):
-					#Error Occured: Must Implement
 					pass
 		except KeyboardInterrupt:
 			logging.info("Shutting Down ChatManager")
@@ -97,28 +96,38 @@ class ChatManager:
 
 
 		copy = cmd.copy()
-		copy["message"] = "The user "+ copy["alias"] + " joined the room"
+		copy["message"] = "The user "+ copy["alias"] + " joined the room."
 		self.send_message(copy)
 		return 0 #Success
 		
 	def leave_room(self,cmd):
 		logging.info("ChatManager: Leave Room")
-		if not self._room_exists(cmd["room"]):
-			logging.debug("ChatManger: Room(" + cmd["room"] + ") does not exist")
-			return  # Chat Room does not exit
 
-		current_room = self.get_room(cmd["room"])
-		if not current_room.remove_user(cmd["address"],cmd["alias"]):
-			logging.debug("ChatManger: Deleting User(" + cmd["alias"] + ") does not exist")
-			return
+		if cmd["alias"] == "" or cmd["alias"] == "Q":
+			for key, r in self._rooms.items():
+				if r.address_in_room(cmd["address"]):
+					r.remove_user(cmd["address"])
+					break
+			if not cmd["alias"] == "Q":
+				logging.debug("ChatManager: Error Address not in Room")
+		else:
+			if not self._room_exists(cmd["room"]):
+				logging.debug("ChatManger: Room(" + cmd["room"] + ") does not exist")
+				return  # Chat Room does not exit
 
-		if current_room.is_empty():
+			current_room = self.get_room(cmd["room"])
+
+			if not current_room.remove_user(cmd["address"],cmd["alias"]):
+				logging.debug("ChatManger: Deleting User(" + cmd["alias"] + ") does not exist")
+				return
+
+		if cmd["room"] != "" and self.get_room(cmd["room"]).is_empty():
 			logging.info("ChatManager: Removing Room (" + cmd["room"] + ")")
 			self._rooms.pop(cmd["room"])
-
-		copy = cmd.copy()
-		copy["message"] = "The user " + copy["alias"] + " left the room"
-		self.send_message(copy)
+		else:
+			copy = cmd.copy()
+			copy["message"] = "The user " + copy["alias"] + " left the room."
+			self.send_message(copy)
 		
 	def send_message(self,cmd):
 		logging.info("ChatManager: Send message")
