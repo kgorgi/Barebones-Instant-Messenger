@@ -2,6 +2,8 @@ from tkinter import *
 from clienthandler.client_handler import ClientHandler
 
 class GUI:
+	update_speed = 250 #Milliseconds
+
 	def __init__(self):
 		#function to bring frame to foreground
 		def raise_frame(frame):
@@ -105,7 +107,7 @@ class GUI:
 					message_text.insert(END,"\n%s" % new_message)
 					message_text['state'] = DISABLED
 					message_text.see(END)
-			root.after(150, recieve)
+			root.after(self.update_speed, recieve)
 
 		def login(method):
 			#send data
@@ -179,5 +181,5 @@ class GUI:
 		raise_frame(user_setup)
 		root.protocol("WM_DELETE_WINDOW", on_closing)
 		root.bind('<Return>', send_enter)
-		root.after(150, recieve)
+		root.after(self.update_speed, recieve)
 		root.mainloop()

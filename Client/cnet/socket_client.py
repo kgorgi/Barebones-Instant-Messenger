@@ -10,6 +10,8 @@ from cnet.cnet_interface import Networking
 
 class ClientNetworking(Networking):
 
+    update_speed = 0.050 #Seconds
+
     def __init__(self, address, port):
         self._successful_init = False
         logging.basicConfig(level=logging.DEBUG)
@@ -88,7 +90,7 @@ class ClientNetworking(Networking):
                     logging.debug("ERROR: " + str(e))
                     break
 
-            time.sleep(0.050)
+            time.sleep(self.update_speed)
 
     def shutdown(self):
         logging.info("ClientNetworking Shutting Down")
