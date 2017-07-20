@@ -21,7 +21,7 @@ class ClientHandler(ClientBackend):
         self._networkService.send_message(join_json)
 		
         server_feedback = None
-        while server_feedback is None or len(server_feedback) != 1:
+        while server_feedback is None:
             server_feedback = self._networkService.receive_next_message()
         
         server_feedback = server_feedback.rstrip(" ")
@@ -51,6 +51,11 @@ class ClientHandler(ClientBackend):
     def leave_room(self):
         leave_json = self.create_instruction("L", self.alias_name, self.room_name, None)
         self._networkService.send_message(leave_json)
+    
+        server_feedback = self._networkService.receive_next_message()
+        while server_feedback is not None:
+            server_feedback = self._networkService.receive_next_message()
+
 
     def quit(self):
         quit_json = self.create_instruction("Q", self.alias_name, self.room_name, None)
