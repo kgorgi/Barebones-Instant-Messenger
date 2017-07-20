@@ -19,10 +19,9 @@ class TestChatManager(unittest.TestCase):
         cmd = self.create_command("D", "b", "c", "d", None)
         self.assertFalse(self.cm._execute_cmd(cmd))
 
-
     def test_create_room(self):
         cmd = self.create_command(None, "Goh", "1234", "RoomTest", None)
-        self.cm.create_room(cmd)
+        self.assertTrue(self.cm.create_room(cmd))
         self.assertEqual(self.cm.get_room("RoomTest").get_name(),"RoomTest")
 
     def test_create_existing_room(self):
@@ -35,7 +34,7 @@ class TestChatManager(unittest.TestCase):
         self.cm.create_room(cmd)
 
         cmd2 = self.create_command(None, "Goh2", "12345", "RoomTest", None)
-        self.cm.join_room(cmd2)
+        self.assertEqual(self.cm.join_room(cmd2), 0)
 
         self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh","Goh2"])
         self.assertEqual(self.cm.get_room("RoomTest").get_address_list(), ["1234", "12345"])
@@ -49,6 +48,11 @@ class TestChatManager(unittest.TestCase):
         self.assertEqual(self.cm.join_room(cmd2),1)
         self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh"])
 
+    def test_join_non_existent_chat_room(self):
+        cmd = self.create_command(None, "Goh", "1234", "RoomTest2", None)
+
+        self.assertEqual(self.cm.join_room(cmd), 3)
+
     def test_leave_room(self):
         cmd = self.create_command("", "Goh", "1234", "RoomTest", "")
         self.cm.create_room(cmd)
@@ -59,6 +63,37 @@ class TestChatManager(unittest.TestCase):
         self.cm.leave_room(cmd2)
 
         self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh"])
+
+    def test_leave_room_delete(self):
+        cmd = self.create_command("", "Goh", "1234", "RoomTest", "")
+        self.cm.create_room(cmd)
+
+        cmd2 = self.create_command("", "Goh", "1234", "RoomTest", "")
+
+        self.cm.leave_room(cmd2)
+
+        self.assertEqual(len(self.cm._rooms), 0)
+
+    def test_quit_room(self):
+        cmd = self.create_command("", "Goh", "1234", "RoomTest", "")
+        self.cm.create_room(cmd)
+
+        cmd2 = self.create_command("", "Goh2", "12345", "RoomTest", "")
+        self.cm.join_room(cmd2)
+
+        cmd3 = self.create_command("Q", "", "12345", "", "")
+        self.cm.leave_room(cmd3)
+
+        self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(), ["Goh"])
+
+    def test_quit_room_delete(self):
+        cmd = self.create_command("", "Goh", "1234", "RoomTest", "")
+        self.cm.create_room(cmd)
+
+        cmd2 = self.create_command("Q", "", "1234", "", "")
+        self.cm.leave_room(cmd2)
+
+        self.assertEqual(len(self.cm._rooms), 0)
 
     def create_command(self, command, alias, address, room, message):
         d = dict()

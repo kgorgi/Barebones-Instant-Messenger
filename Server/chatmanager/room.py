@@ -32,6 +32,7 @@ class Room:
         self._address_list.remove(address)
         alias = self._alias_list[i]
         del self._alias_list[i]
+        self._user_count -= 1
         return alias
 
     def address_in_room(self, address):

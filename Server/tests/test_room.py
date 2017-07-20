@@ -61,9 +61,20 @@ class TestRoom(unittest.TestCase):
 	def test_remove_by_address(self):
 		rm = Room("ad1", "alA", "newRoom")
 		rm.add_user("ad2", "alB")
-		rm.remove_user_by_address("ad1")
+		self.assertEqual(rm.remove_user_by_address("ad1"), "alA")
 		self.assertEqual(rm.get_address_list(), ["ad2"])
 		self.assertEqual(rm.get_alias_list(), ["alB"])
+
+	def test_is_empty(self):
+		rm = Room("ad1", "alA", "newRoom")
+		self.assertFalse(rm.is_empty())
+
+		rm.add_user("ad2", "alB")
+		rm.remove_user_by_address("ad2")
+		self.assertFalse(rm.is_empty())
+
+		rm.remove_user("ad1", "alA")
+		self.assertTrue(rm.is_empty())
 
 if __name__=='__main__':
 	unittest.main()

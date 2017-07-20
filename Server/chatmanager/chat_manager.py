@@ -126,6 +126,7 @@ class ChatManager:
 					break
 			if not success:
 				logging.debug("ChatManager: Error Address + " + addr + " not in any room.")
+				return
 		else:
 			room_str = cmd["room"]
 			#User Has Left a Chat Room Normally: Room and Alias Provided
@@ -140,10 +141,9 @@ class ChatManager:
 				logging.debug("ChatManger: Deleting User(" + alias + ") does not exist in room (" + room_str + ")" )
 				return
 
-		#Delete Chat Room if it is Empty
-		if room != None and room.is_empty():
-			logging.info("ChatManager: Removing Room (" + cmd["room"] + ")")
-			self._rooms.pop(cmd["room"])
+		if room.is_empty():
+			logging.info("ChatManager: Removing Room (" + room.get_name() + ")")
+			self._rooms.pop(room.get_name())
 		else:
 			copy = cmd.copy()
 			copy["message"] = "The user " + alias + " left the room."

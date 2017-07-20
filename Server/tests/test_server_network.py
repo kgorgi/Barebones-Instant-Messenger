@@ -50,6 +50,7 @@ class TestServerNetwork(unittest.TestCase):
 
         addr_list = [address1, address2]
 
+        time.sleep(2)
         cls.server_N.send_message(addr_list, msg)
 
         client_msg1 = cls.client_s.recv(4096)
