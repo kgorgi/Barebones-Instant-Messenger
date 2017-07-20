@@ -23,7 +23,7 @@ class TestServerNetwork(unittest.TestCase):
             cls.fail("Cannot Connect to Server")
 
     def test_receive_message(cls):
-        msg = "Testing12345"
+        msg = "Testing1234523948230840234238409823"
         cls.client_s.send(msg.encode("utf-8"))
         time.sleep(2)
         cls.assertEqual(cls.server_N.retrieve_next_message(),msg)
@@ -35,7 +35,7 @@ class TestServerNetwork(unittest.TestCase):
         address = "127.0.0.1:" + str(port)
         cls.server_N.send_response(address, msg)
         client_msg = cls.client_s.recv(4096)
-        cls.assertEqual(msg, client_msg.decode("utf-8"))
+        cls.assertEqual(msg, client_msg.decode("utf-8").rstrip(" "))
 
     def test_send_message(cls):
         msg = "MULTIMESSAGE2017"
@@ -53,10 +53,11 @@ class TestServerNetwork(unittest.TestCase):
         cls.server_N.send_message(addr_list, msg)
 
         client_msg1 = cls.client_s.recv(4096)
-        cls.assertEqual(msg, client_msg1.decode("utf-8"))
+        cls.assertEqual(msg, client_msg1.decode("utf-8").rstrip(" "))
 
         client_msg2 = second_socket.recv(4096)
-        cls.assertEqual(msg, client_msg2.decode("utf-8"))
+        cls.assertEqual(msg, client_msg2.decode("utf-8").rstrip(" "))
+        second_socket.close()
 
 if __name__ == '__main__':
     unittest.main()

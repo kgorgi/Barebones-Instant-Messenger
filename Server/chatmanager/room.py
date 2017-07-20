@@ -25,13 +25,14 @@ class Room:
             self._user_count -= 1
             return True
 
-        if address in self._address_list and alias is None:
-            i = self._address_list.index(address)
-            self._address_list.remove(address)
-            del self._alias_list[i]
-            return True
-
         return False
+
+    def remove_user_by_address(self, address):
+        i = self._address_list.index(address)
+        self._address_list.remove(address)
+        alias = self._alias_list[i]
+        del self._alias_list[i]
+        return alias
 
     def address_in_room(self, address):
         if address in self._address_list:

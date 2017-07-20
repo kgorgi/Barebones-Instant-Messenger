@@ -18,7 +18,6 @@ class ServerNetwork(Networking):
         self._host = address
         self._port = port
 
-
         self._socket_dict = dict()
         self._accept_s = socket.socket()
 
@@ -67,9 +66,12 @@ class ServerNetwork(Networking):
             client.setblocking(0)
             str_addr = str(addr[0]) + ":" +  str(addr[1])
             logging.info("Adding Client: " + str_addr)
+
             d_lock.acquire()
             delete_lock.acquire()
+
             s_dict[str_addr] = client
+
             delete_lock.release()
             d_lock.release()
 
@@ -77,59 +79,63 @@ class ServerNetwork(Networking):
         while True:
             addr, msg_to_send = s_queue.get()
             s_queue.task_done()
+
+            #Append Appropriate Amount of Characters
             msg_length = len(msg_to_send)
             msg_to_send = msg_to_send + ' ' * (280 - msg_length)
+
+            #Send Message
             d_lock.acquire()
+
             try:
                 s_dict[addr].send(msg_to_send.encode("utf-8"))
             except KeyError:
+                #Socket Will Be Cleaned Up By Recieve Function, Just Log Error
                 logging.info("Networking: Invalid Address (" + addr + ")")
             d_lock.release()
-            logging.info("Sent(" + addr + "): " + msg_to_send.rstrip(""))
+
+            logging.info("Sent(" + addr + "): " + msg_to_send)
 
     def _exceute_receive(self, s_dict, d_lock, delete_lock, r_queue):
+
+        def shut_down_socket(conn):
+            logging.info("Networking: Closing Connection " + key)
+            delete_lock.acquire()
+            s.close()
+            del s_dict[key]
+            delete_lock.release()
+
         while True:
             d_lock.acquire()
 
+            #Iterate Through All Sockets Checking if Data is Available
             for key in s_dict.keys():
                 s = s_dict[key]
                 try:
                     msg = s.recv(280)
                     if len(msg) != 0:
                         msg = msg.decode("utf-8")
-                        logging.info("Received(" + key + "): " + msg.rstrip(" "))
+                        msg = msg.rstrip(" ")
+                        logging.info("Received(" + key + "): " + msg)
 
-                        if msg[13] == "Q":
-                            #Client Shutdown
-                            logging.info("Networking: Closing Connection " + key)
-                            delete_lock.acquire()
-                            s.close()
-                            del s_dict[key]
-                            delete_lock.release()
-
-
+                        if msg[13] == "Q":  #Client Shutdown
+                            shut_down_socket(s)
+                            break
                         r_queue.put(msg)
-                        break
+
                 except socket.error as e:
                     err = e.args[0]
-                    if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-                        continue
-                    else:
+                    if err != errno.EAGAIN and err != errno.EWOULDBLOCK:
                         #Socket Error Close and Tell Client
                         leave_command = {
-                            "command": "L",
+                            "command": "Q",
                             "alias": "",
                             "address": key,
                             "room": "",
                             "message": ""
                         }
 
-                        logging.info("Networking: Closing Connection " + key)
-                        delete_lock.acquire()
-                        s.close()
-                        del s_dict[key]
-                        delete_lock.release()
-
+                        shut_down_socket(s)
                         create_json = json.dumps(leave_command)
                         r_queue.put(create_json)
                         break
@@ -170,6 +176,7 @@ class ServerNetwork(Networking):
         self.shutdown()
 
 def main():
+    #Start Up Network Manually
     n = ServerNetwork("127.0.0.1", 8000)
     input("Press a key to exit\n")
 

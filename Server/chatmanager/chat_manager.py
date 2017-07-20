@@ -27,7 +27,6 @@ class ChatManager:
 	"""
 
 	def _parse_incoming(self, in_json):
-		trimmed_json = in_json.rstrip(" ")
 		cmd_data = json.loads(in_json)
 
 		for item in cmd_data:
@@ -40,7 +39,7 @@ class ChatManager:
 
 		return cmd_data
 
-	def send_join_message(self, cmd, response_code):
+	def _send_join_message(self, cmd, response_code):
 		if response_code == 0:
 			copy = cmd.copy()
 			copy["message"] = "The user " + copy["alias"] + " joined the room."
@@ -53,12 +52,12 @@ class ChatManager:
 				result = 2 #Room Exists
 			self.send_response(cmd["address"], result)
 
-			self.send_join_message(cmd, result)
+			self._send_join_message(cmd, result)
 
 		elif(cmd["command"] == "J"): #Join
 			response_code = self.join_room(cmd)
 			self.send_response(cmd["address"], response_code )
-			self.send_join_message(cmd, response_code)
+			self._send_join_message(cmd, response_code)
 		elif(cmd["command"] == "L" or cmd["command"] == "Q"): #Leave
 			self.leave_room(cmd)
 		elif(cmd["command"] == "S"): #Send
@@ -99,7 +98,7 @@ class ChatManager:
 	def join_room(self,cmd):
 		logging.info("ChatManager: Join Room")
 		if not self._room_exists(cmd["room"]):
-			return 3 #Chat Room does not exit
+			return 3 #Chat Room Does Not exit
 
 		current_room =self.get_room(cmd["room"])
 		if not current_room.add_user(cmd["address"],cmd["alias"]):
@@ -109,38 +108,51 @@ class ChatManager:
 		
 	def leave_room(self,cmd):
 		logging.info("ChatManager: Leave Room")
+		room = None
+		alias = None
 
-		if cmd["alias"] == "" or cmd["alias"] == "Q":
+		# User Has Quit Out of the Application or the Connection Has Been Dropped
+		if cmd["command"] == "Q":
+			#No Alias or Room Specified: Search Manually
+			addr = cmd["address"]
+			success = False
 			for key, r in self._rooms.items():
-				if r.address_in_room(cmd["address"]):
-					r.remove_user(cmd["address"])
+				if r.address_in_room(addr):
+					alias = r.remove_user_by_address(addr)
+					room = r
+					success = True
 					break
-			if not cmd["alias"] == "Q":
-				logging.debug("ChatManager: Error Address not in Room")
+			if not success:
+				logging.debug("ChatManager: Error Address + " + addr + " not in any room.")
 		else:
-			if not self._room_exists(cmd["room"]):
-				logging.debug("ChatManger: Room(" + cmd["room"] + ") does not exist")
+			room_str = cmd["room"]
+			#User Has Left a Chat Room Normally: Room and Alias Provided
+			if not self._room_exists(room_str):
+				logging.debug("ChatManger: Room(" + room_str + ") does not exist")
 				return  # Chat Room does not exit
 
-			current_room = self.get_room(cmd["room"])
+			alias = cmd["alias"]
+			room = self.get_room(room_str)
 
-			if not current_room.remove_user(cmd["address"],cmd["alias"]):
-				logging.debug("ChatManger: Deleting User(" + cmd["alias"] + ") does not exist")
+			if not room.remove_user(cmd["address"], alias):
+				logging.debug("ChatManger: Deleting User(" + alias + ") does not exist in room (" + room_str + ")" )
 				return
 
-		if cmd["room"] != "" and self.get_room(cmd["room"]).is_empty():
+		#Delete Chat Room if it is Empty
+		if room != None and room.is_empty():
 			logging.info("ChatManager: Removing Room (" + cmd["room"] + ")")
 			self._rooms.pop(cmd["room"])
 		else:
 			copy = cmd.copy()
-			copy["message"] = "The user " + copy["alias"] + " left the room."
+			copy["message"] = "The user " + alias + " left the room."
+			copy["room"] = room.get_name()
 			self.send_message(copy)
 		
 	def send_message(self,cmd):
 		logging.info("ChatManager: Send message")
 
-		addresses=self._rooms[cmd["room"]].get_address_list()
-		self._networkService.send_message(addresses,cmd["message"])
+		addresses = self.get_room(cmd["room"]).get_address_list()
+		self._networkService.send_message(addresses, cmd["message"])
 
 	def send_response(self, address, res):
 		self._networkService.send_response(address, str(res))
