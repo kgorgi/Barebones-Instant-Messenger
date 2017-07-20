@@ -53,5 +53,17 @@ class TestRoom(unittest.TestCase):
 			compare.append(al)
 		self.assertEqual(rm.get_alias_list(), compare)
 
+	def test_address_in_room(self):
+		rm = Room("ad1", "al1", "newRoom")
+		self.assertFalse(rm.address_in_room("b2"))
+		self.assertTrue(rm.address_in_room("ad1"))
+
+	def test_remove_by_address(self):
+		rm = Room("ad1", "alA", "newRoom")
+		rm.add_user("ad2", "alB")
+		rm.remove_user_by_address("ad1")
+		self.assertEqual(rm.get_address_list(), ["ad2"])
+		self.assertEqual(rm.get_alias_list(), ["alB"])
+
 if __name__=='__main__':
 	unittest.main()

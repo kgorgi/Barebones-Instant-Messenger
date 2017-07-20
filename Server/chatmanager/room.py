@@ -16,7 +16,7 @@ class Room:
         self._user_count += 1
         return True
 
-    def remove_user(self, address, alias = None):
+    def remove_user(self, address, alias):
         # Only deletes first instance of alias and address, doesn't check duplicates
         #Add ability to delete based only on address
         if address in self._address_list and alias in self._alias_list:
