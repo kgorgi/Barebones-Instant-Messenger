@@ -143,7 +143,7 @@ class ServerNetwork(Networking):
                         break
 
             d_lock.release()
-            time.sleep(0.050)
+            time.sleep(settings.ChatServer.get('updatetime'))
 
     def send_response(self, address, response):
         e = (address, response)
