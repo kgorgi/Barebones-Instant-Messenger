@@ -1,5 +1,6 @@
 import json
 import logging
+import settings
 from chatmanager.room import Room
 from snet.socket_server import ServerNetwork
 
@@ -8,7 +9,8 @@ class ChatManager:
 	_port = 8000
 
 	def __init__(self):
-		logging.basicConfig(level=logging.DEBUG)
+		logging.basicConfig(format = settings.ChatServer.get('flog'),level= settings.ChatServer.get('logging'))
+
 		logging.info("Starting ChatManager")
 		self._rooms = dict()
 		self._networkService = ServerNetwork(self._host, self._port)

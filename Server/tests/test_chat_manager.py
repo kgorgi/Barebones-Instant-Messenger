@@ -16,7 +16,7 @@ class TestChatManager(unittest.TestCase):
 
 
     def test__execute_invalid_cmd(self):
-        cmd = self.create_command("Q", "b", "c", "d", None)
+        cmd = self.create_command("D", "b", "c", "d", None)
         self.assertFalse(self.cm._execute_cmd(cmd))
 
 
@@ -50,10 +50,10 @@ class TestChatManager(unittest.TestCase):
         self.assertEqual(self.cm.get_room("RoomTest").get_alias_list(),["Goh"])
 
     def test_leave_room(self):
-        cmd = self.create_command(None, "Goh", "1234", "RoomTest", None)
+        cmd = self.create_command("", "Goh", "1234", "RoomTest", "")
         self.cm.create_room(cmd)
 
-        cmd2 = self.create_command(None, "Goh2", "12345", "RoomTest", None)
+        cmd2 = self.create_command("", "Goh2", "12345", "RoomTest", "")
         self.cm.join_room(cmd2)
 
         self.cm.leave_room(cmd2)

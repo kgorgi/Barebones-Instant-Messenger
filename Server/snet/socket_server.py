@@ -6,17 +6,19 @@ import errno
 import atexit
 import logging
 import json
+import settings
 from snet.snet_interface import Networking
 
 class ServerNetwork(Networking):
 
 
     def __init__(self, address, port):
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(format=settings.ChatServer.get('flog'), level=settings.ChatServer.get('logging'))
+
         logging.info("Starting Server Networking")
 
-        self._host = address
-        self._port = port
+        self._host = settings.ChatServer.get('host')
+        self._port = settings.ChatServer.get('port')
 
         self._socket_dict = dict()
         self._accept_s = socket.socket()
