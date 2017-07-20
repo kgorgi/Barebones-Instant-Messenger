@@ -39,15 +39,26 @@ class ChatManager:
 			log_str = log_str + str(key) + ":" + str(item) + " "
 
 		return cmd_data
-		
+
+	def send_join_message(self, cmd, response_code):
+		if response_code == 0:
+			copy = cmd.copy()
+			copy["message"] = "The user " + copy["alias"] + " joined the room."
+			self.send_message(copy)
+
 	def _execute_cmd(self, cmd):
 		if(cmd["command"] == "C"): #Create
 			result = 0
 			if not self.create_room(cmd):
 				result = 2 #Room Exists
 			self.send_response(cmd["address"], result)
+
+			self.send_join_message(cmd, result)
+
 		elif(cmd["command"] == "J"): #Join
-			self.send_response(cmd["address"], self.join_room(cmd))
+			response_code = self.join_room(cmd)
+			self.send_response(cmd["address"], response_code )
+			self.send_join_message(cmd, response_code)
 		elif(cmd["command"] == "L" or cmd["command"] == "Q"): #Leave
 			self.leave_room(cmd)
 		elif(cmd["command"] == "S"): #Send
@@ -94,10 +105,6 @@ class ChatManager:
 		if not current_room.add_user(cmd["address"],cmd["alias"]):
 			return 1 #Alias Already Exists
 
-
-		copy = cmd.copy()
-		copy["message"] = "The user "+ copy["alias"] + " joined the room."
-		self.send_message(copy)
 		return 0 #Success
 		
 	def leave_room(self,cmd):
