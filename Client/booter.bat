@@ -3,7 +3,7 @@
 echo Here we GO!!
 
 i=0
-max=1000
+max=498
 room="Rooom"
 
 # osascript -e 'tell app "Terminal" 
