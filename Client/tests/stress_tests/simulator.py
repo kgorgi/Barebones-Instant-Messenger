@@ -6,12 +6,12 @@ import time
 
 def main():
 
-	delay=1
+	delay = 1
 
-	client=ClientHandler()
+	client = ClientHandler()
 
-	room=str(sys.argv[1])
-	name="User"+str(sys.argv[2])
+	room = str(sys.argv[1])
+	name = "User"+str(sys.argv[2])
 
 	#print(room+name)
 	
@@ -25,8 +25,12 @@ def main():
 	client.leave_room()
 	"""
 
-	time.sleep(120)
+	print("TES")
+	user_input = input()
 
+	while user_input != "EXIT":
+		client.send_message(user_input)
+		user_input = input()
 
 if __name__=="__main__":
 	main()
