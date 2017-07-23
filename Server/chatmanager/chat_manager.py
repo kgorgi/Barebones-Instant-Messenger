@@ -5,8 +5,8 @@ from chatmanager.room import Room
 from snet.socket_server import ServerNetwork
 
 class ChatManager:
-	_host = "127.0.0.1"
-	_port = 8000
+	_host = settings.ChatServer.get('host')
+	_port = settings.ChatServer.get('port')
 
 	def __init__(self):
 		logging.basicConfig(format = settings.ChatServer.get('flog'),level= settings.ChatServer.get('logging'))
