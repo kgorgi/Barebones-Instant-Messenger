@@ -88,6 +88,8 @@ class ServerNetwork(Networking):
             #Send Message
             d_lock.acquire()
 
+            logging.info("Networking: Sending Messages: " + msg_to_send)
+
             for addr in addr_list:
                 try:
                     s_dict[addr].send(msg_to_send.encode("utf-8"))
@@ -97,8 +99,9 @@ class ServerNetwork(Networking):
                 except BrokenPipeError:
                     logging.debug("Networking: Send Failure (" + addr + ") Broken Pipe Error")
 
-                logging.info("Sent(" + addr + "): " + msg_to_send)
+                #logging.info("Sent(" + addr + "): " + msg_to_send)
 
+            logging.info("Networking: Messages Sent")
             d_lock.release()
 
 
