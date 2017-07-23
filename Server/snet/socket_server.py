@@ -77,6 +77,18 @@ class ServerNetwork(Networking):
             d_lock.release()
 
     def _execute_send(self, s_dict, d_lock, s_queue):
+        def thread_send_message(s_dict, addr_list, msg_to_send):
+            for addr in addr_list:
+                try:
+                    s_dict[addr].send(msg_to_send.encode("utf-8"))
+                except KeyError:
+                    # Socket Will Be Cleaned Up By Recieve Function, Just Log Error
+                    logging.debug("Networking: Invalid Address (" + addr + ")")
+                except BrokenPipeError:
+                    logging.debug("Networking: Send Failure (" + addr + ") Broken Pipe Error")
+
+                #logging.info("Send Thread: Done")
+
         while True:
             addr_list, msg_to_send = s_queue.get()
             s_queue.task_done()
@@ -88,23 +100,41 @@ class ServerNetwork(Networking):
             #Send Message
             d_lock.acquire()
 
+            #Create Sublists of Address List
             logging.info("Networking: Sending Messages: " + msg_to_send)
 
-            for addr in addr_list:
-                try:
-                    s_dict[addr].send(msg_to_send.encode("utf-8"))
-                except KeyError:
-                    #Socket Will Be Cleaned Up By Recieve Function, Just Log Error
-                    logging.debug("Networking: Invalid Address (" + addr + ")")
-                except BrokenPipeError:
-                    logging.debug("Networking: Send Failure (" + addr + ") Broken Pipe Error")
+            addr_chunks = list()
+            addr_chunks.append(list())
+            curr_chunk = 0
 
-                #logging.info("Sent(" + addr + "): " + msg_to_send)
+            i = 0
+            max = 100;
+
+            for addr in addr_list:
+                if i > max:
+                    i = 0
+                    curr_chunk += 1
+                    addr_chunks.append(list())
+
+                addr_chunks[curr_chunk].append(addr)
+                i += 1
+
+            thread_list = []
+            for chunk in addr_chunks:
+                t_args = (s_dict, chunk, msg_to_send)
+                t = threading.Thread(target=thread_send_message, args=t_args)
+                t.start()
+                thread_list.append(t)
+
+            for t in thread_list:
+                t.join()
 
             logging.info("Networking: Messages Sent")
             d_lock.release()
 
 
+
+                # logging.info("Sent(" + addr + "): " + msg_to_send)
     def _exceute_receive(self, s_dict, d_lock, delete_lock, r_queue):
 
         def shut_down_socket(conn):
