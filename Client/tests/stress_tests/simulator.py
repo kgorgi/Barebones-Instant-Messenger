@@ -25,7 +25,6 @@ def main():
 	client.leave_room()
 	"""
 
-	print("TES")
 	user_input = input()
 
 	while user_input != "EXIT":

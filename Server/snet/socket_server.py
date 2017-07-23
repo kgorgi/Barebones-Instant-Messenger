@@ -11,7 +11,6 @@ from snet.snet_interface import Networking
 
 class ServerNetwork(Networking):
 
-
     def __init__(self, address, port):
         logging.basicConfig(format=settings.ChatServer.get('flog'), level=settings.ChatServer.get('logging'))
 
@@ -79,7 +78,7 @@ class ServerNetwork(Networking):
 
     def _execute_send(self, s_dict, d_lock, s_queue):
         while True:
-            addr, msg_to_send = s_queue.get()
+            addr_list, msg_to_send = s_queue.get()
             s_queue.task_done()
 
             #Append Appropriate Amount of Characters
@@ -89,17 +88,19 @@ class ServerNetwork(Networking):
             #Send Message
             d_lock.acquire()
 
-            try:
-                s_dict[addr].send(msg_to_send.encode("utf-8"))
-            except KeyError:
-                #Socket Will Be Cleaned Up By Recieve Function, Just Log Error
-                logging.debug("Networking: Invalid Address (" + addr + ")")
-            except BrokenPipeError:
-                logging.debug("Networking: Send Failure (" + addr + ") Broken Pipe Error")
+            for addr in addr_list:
+                try:
+                    s_dict[addr].send(msg_to_send.encode("utf-8"))
+                except KeyError:
+                    #Socket Will Be Cleaned Up By Recieve Function, Just Log Error
+                    logging.debug("Networking: Invalid Address (" + addr + ")")
+                except BrokenPipeError:
+                    logging.debug("Networking: Send Failure (" + addr + ") Broken Pipe Error")
+
+                logging.info("Sent(" + addr + "): " + msg_to_send)
 
             d_lock.release()
 
-            logging.info("Sent(" + addr + "): " + msg_to_send)
 
     def _exceute_receive(self, s_dict, d_lock, delete_lock, r_queue):
 
@@ -149,13 +150,14 @@ class ServerNetwork(Networking):
             time.sleep(settings.ChatServer.get('updatetime'))
 
     def send_response(self, address, response):
-        e = (address, response)
+        addr_list = list()
+        addr_list.append(address)
+        e = (addr_list, response)
         self._smsgs_queue.put(e)
 
     def send_message(self, addresses, msg):
-        for adrs in addresses:
-            e = (adrs, msg)
-            self._smsgs_queue.put(e)
+        e = (addresses, msg)
+        self._smsgs_queue.put(e)
 
     def retrieve_next_message(self):
         if not self._rmsgs_queue.empty():
