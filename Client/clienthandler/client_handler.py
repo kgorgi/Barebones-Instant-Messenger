@@ -56,7 +56,7 @@ class ClientHandler(ClientBackend):
         return new_message
 
     def connected(self):
-        logging.info("The server is connected: "+ str(self._networkService.is_connected))
+        #logging.info("The server is connected: "+ str(self._networkService.is_connected))
         return self._networkService.is_connected
 
 

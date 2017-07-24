@@ -54,12 +54,13 @@ class ChatManager:
 				result = 2 #Room Exists
 			self.send_response(cmd["address"], result)
 
-			self._send_join_message(cmd, result)
+			#self._send_join_message(cmd, result)
 
 		elif(cmd["command"] == "J"): #Join
 			response_code = self.join_room(cmd)
 			self.send_response(cmd["address"], response_code )
-			self._send_join_message(cmd, response_code)
+			#self._send_join_message(cmd, response_code)
+			self.send_response(cmd["address"], str(len(self._networkService._socket_dict)) + " Clients Connected")
 		elif(cmd["command"] == "L" or cmd["command"] == "Q"): #Leave
 			self.leave_room(cmd)
 		elif(cmd["command"] == "S"): #Send
