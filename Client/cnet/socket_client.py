@@ -34,6 +34,7 @@ class ClientNetworking(Networking):
             sys.exit(0)
 
         logging.info("Successfully Connected")
+        self.is_connected = True
 
         args_send = (self.client_socket ,self.send_msg_queue)
         self.send_msg_thread = threading.Thread(target=self.execute_send, args= args_send)
@@ -80,6 +81,7 @@ class ClientNetworking(Networking):
                 if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
                     continue
                 else:
+                    self.is_connected = False
                     logging.debug("ERROR: " + str(e))
                     break
 
