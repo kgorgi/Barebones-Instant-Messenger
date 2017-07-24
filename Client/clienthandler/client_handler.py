@@ -11,7 +11,6 @@ class ClientHandler(ClientBackend):
         self._networkService = ClientNetworking("134.87.147.243", 8000)
         self.room_name = ""
         self.alias_name = ""
-        self.messages = []
         self.client_address = self._networkService.get_local_address()
 
     def join_room(self, room_name, alias):

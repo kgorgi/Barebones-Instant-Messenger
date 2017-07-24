@@ -12,7 +12,7 @@ class ClientNetworking(Networking):
 
     def __init__(self, address, port):
         self._successful_init = False
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
         logging.info("Starting Client Networking")
 
         self._host = address

@@ -16,8 +16,8 @@ class ServerNetwork(Networking):
 
         logging.info("Starting Server Networking")
 
-        self._host = settings.ChatServer.get('host')
-        self._port = settings.ChatServer.get('port')
+        self._host = address
+        self._port = port
 
         self._socket_dict = dict()
         self._accept_s = socket.socket()
@@ -87,7 +87,6 @@ class ServerNetwork(Networking):
                 except BrokenPipeError:
                     logging.debug("Networking: Send Failure (" + addr + ") Broken Pipe Error")
 
-                #logging.info("Send Thread: Done")
 
         while True:
             addr_list, msg_to_send = s_queue.get()
@@ -100,9 +99,9 @@ class ServerNetwork(Networking):
             #Send Message
             d_lock.acquire()
 
-            #Create Sublists of Address List
             logging.info("Networking: Sending Messages: " + msg_to_send)
 
+            #Create Sublists of Address List
             addr_chunks = list()
             addr_chunks.append(list())
             curr_chunk = 0
@@ -119,6 +118,7 @@ class ServerNetwork(Networking):
                 addr_chunks[curr_chunk].append(addr)
                 i += 1
 
+            #Spawn new threads to handle each chunk of the list
             thread_list = []
             for chunk in addr_chunks:
                 t_args = (s_dict, chunk, msg_to_send)
@@ -126,22 +126,20 @@ class ServerNetwork(Networking):
                 t.start()
                 thread_list.append(t)
 
+            #Wait for the threads to finish
             for t in thread_list:
                 t.join()
 
             logging.info("Networking: Messages Sent")
             d_lock.release()
 
-
-
-                # logging.info("Sent(" + addr + "): " + msg_to_send)
     def _exceute_receive(self, s_dict, d_lock, delete_lock, r_queue):
 
-        def shut_down_socket(conn):
+        def shut_down_socket(conn, addr):
             logging.info("Networking: Closing Connection " + key)
             delete_lock.acquire()
-            s.close()
-            del s_dict[key]
+            conn.close()
+            del s_dict[addr]
             delete_lock.release()
 
         while True:
@@ -157,10 +155,10 @@ class ServerNetwork(Networking):
                         msg = msg.rstrip(" ")
                         logging.info("Received(" + key + "): " + msg)
 
-                        if msg[13] == "Q":  #Client Shutdown
-                            shut_down_socket(s)
-                            break
                         r_queue.put(msg)
+                        if msg[13] == "Q":  #Client Shutdown
+                            shut_down_socket(s, key)
+                            break
 
                 except socket.error as e:
                     err = e.args[0]
@@ -174,7 +172,7 @@ class ServerNetwork(Networking):
                             "message": ""
                         }
 
-                        shut_down_socket(s)
+                        shut_down_socket(s, key)
                         create_json = json.dumps(leave_command)
                         r_queue.put(create_json)
                         break

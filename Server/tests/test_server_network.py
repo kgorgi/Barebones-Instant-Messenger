@@ -34,7 +34,7 @@ class TestServerNetwork(unittest.TestCase):
         addr, port = (cls.client_s.getsockname())
         address = "127.0.0.1:" + str(port)
         cls.server_N.send_response(address, msg)
-        client_msg = cls.client_s.recv(4096)
+        client_msg = cls.client_s.recv(280)
         cls.assertEqual(msg, client_msg.decode("utf-8").rstrip(" "))
 
     def test_send_message(cls):
@@ -53,10 +53,10 @@ class TestServerNetwork(unittest.TestCase):
         time.sleep(2)
         cls.server_N.send_message(addr_list, msg)
 
-        client_msg1 = cls.client_s.recv(4096)
+        client_msg1 = cls.client_s.recv(280)
         cls.assertEqual(msg, client_msg1.decode("utf-8").rstrip(" "))
 
-        client_msg2 = second_socket.recv(4096)
+        client_msg2 = second_socket.recv(280)
         cls.assertEqual(msg, client_msg2.decode("utf-8").rstrip(" "))
         second_socket.close()
 

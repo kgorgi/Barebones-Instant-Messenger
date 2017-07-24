@@ -31,7 +31,7 @@ class GUI:
 
 		#user_setup widgets initialized
 
-		#limit character to N function
+		#limit character to length N function
 		def limit_entry_size(limited_text, N):
 			if len(limited_text.get()) > N:
 				limited_text.set(limited_text.get()[:N])
@@ -55,11 +55,11 @@ class GUI:
 		alias_label.place(x=400, y=140)
 		alias_label.config(font=("Courier", 21, 'bold'))
 	
-		join_button = Button(user_setup, text="Join Chatroom",highlightbackground='#c53fff', command=lambda: login("join"))
-		join_button.place(x=200, y=220)
+		join_button = Button(user_setup, text="Join Chatroom",highlightbackground='#c53fff',command=lambda: login("join"))
+		join_button.place(x=200, y=200)
 	
 		create_button = Button(user_setup, text="Create Chatroom",highlightbackground='#c53fff', command=lambda: login("create"))
-		create_button.place(x=400, y=220)
+		create_button.place(x=400, y=200)
 
 		#error message to later be set
 		error_message = StringVar()
@@ -72,12 +72,12 @@ class GUI:
 
 		message.trace('w', lambda *args: limit_entry_size(message, 140))
 
-		send_button = Button(main_view, text="Send Message", highlightbackground='#c53fff', command=lambda: send())
+		send_button = Button(main_view, text="Send Message", highlightbackground='black',borderwidth = 0,highlightthickness=0, relief = RAISED, command=lambda: send())
 		send_button.place(x=680, y = 420)
 		send_image = PhotoImage(file="clienthandler/mail.gif")
 		send_button.config(image=send_image)
 
-		leave_button = Button(main_view, text="Leave", highlightbackground='#c53fff', bd=0, command=lambda: leave())
+		leave_button = Button(main_view, text="Leave", highlightbackground='black', borderwidth = 0,highlightthickness=0, command=lambda: leave())
 		leave_button.place(x=680, y = 10)
 
 		leave_image = PhotoImage(file="clienthandler/door.gif")
@@ -89,12 +89,21 @@ class GUI:
 		scrollbar = Scrollbar(scrolling_text, command = message_text.yview)
 		scrollbar.grid(row=0, column=1, sticky='nsew')
 		message_text['yscrollcommand'] = scrollbar.set
+		
+		#setup labels for current alias and room name
+		roomname_message = StringVar()
+		roomname = Message(main_view, bg = '#c53fff', width = 180, textvariable=roomname_message)
+		roomname.config(font=("Times", 12, 'bold'))
+		
+		alias_message = StringVar()
+		aliasname = Message(main_view, bg = '#c53fff', width = 180, textvariable=alias_message)
+		aliasname.config(font=("Times", 12, 'bold'))
 
 		#push index to bottom of text and disable typing
 		for i in range(1,28):
 			message_text.insert(INSERT, "\n")
 
-		message_text.insert(INSERT, "You are in a chatroom -_-")
+		message_text.insert(INSERT, "You are in a chat room -_-")
 		message_text['state'] = DISABLED
 
 
@@ -109,17 +118,18 @@ class GUI:
 					message_text.see(END)
 			root.after(self.update_speed, recieve)
 
+		#function to either join or create a room
+		#also initializes errors and chatroom and alias display on main_view
 		def login(method):
-			#send data
-			#receive error code
-			#if good
 
 			if method == "join":
 				error_code = client_handler.join_room(chatroom_entry.get(), alias_entry.get())
 			elif method == "create":
 				error_code = client_handler.create_room(chatroom_entry.get(), alias_entry.get())
 
+			#remove prior error message
 			error.place_forget()
+			
 			# returned error code
 			if error_code != 0:
 				if error_code == 1:
@@ -139,12 +149,18 @@ class GUI:
 					error.place(x=300, y = 280)
 					return None
 
-			error.place_forget()
+			#set current room name and alias
+			roomname_message.set("Room Name:\n" + chatroom_entry.get() +"\n")
+			alias_message.set("Alias:\n" + alias_entry.get() +"\n")
 
 			#go to main_view and show text display frame
 			raise_frame(main_view)
 			main_view.visible = True
 			raise_frame(scrolling_text)
+			
+			#place
+			roomname.place(x=675, y = 150)
+			aliasname.place(x =675, y = 190)
 
 		def send():
 			#input func to send message
@@ -174,10 +190,10 @@ class GUI:
 		def on_closing():
 			#input function to leave
 			client_handler.quit()
-			print("goodbye")
+			print("Goodbye")
 			root.destroy()
 
-
+		#begin recieving loop, adjust main window settings, and start loop
 		raise_frame(user_setup)
 		root.protocol("WM_DELETE_WINDOW", on_closing)
 		root.bind('<Return>', send_enter)
