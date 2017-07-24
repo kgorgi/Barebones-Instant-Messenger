@@ -148,11 +148,11 @@ class GUI:
 					error.place(x=300, y = 280)
 					return None
 				elif error_code == 2:
-					error_message.set("Chatroom Name Taken")
+					error_message.set("Chat Room Name Taken")
 					error.place(x=300, y = 280)
 					return None
 				elif error_code == 3:
-					error_message.set("Chatroom Does not Exist")
+					error_message.set("Chat Room Does not Exist")
 					error.place(x=300, y = 280)
 					return None
 				elif error_code == 4:
