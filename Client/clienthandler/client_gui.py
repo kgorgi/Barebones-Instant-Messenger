@@ -117,17 +117,17 @@ class GUI:
 					message_text.insert(END,"\n%s" % new_message)
 					message_text['state'] = DISABLED
 					message_text.see(END)
-					
-				if client_handler.connected() == False and connection_flag == 1:
-                    message_text['state'] = NORMAL
+
+				if client_handler.connected() == False and self.connection_flag == 1:
+					message_text['state'] = NORMAL
 					message_text.insert(END,"\nYou have lost connection to the server")
-                    message_text['state'] = DISABLED
-                    connection_flag = 0
-				elif client_handler.connected() == True and connection_flag == 0:
-                    message_text['state'] = NORMAL
+					message_text['state'] = DISABLED
+					connection_flag = 0
+				elif client_handler.connected() == True and self.connection_flag == 0:
+					message_text['state'] = NORMAL
 					message_text.insert(END,"\nYou have regained connection to the server")
-                    message_text['state'] = DISABLED
-                    connection_flag = 0
+					message_text['state'] = DISABLED
+					connection_flag = 0
 
 			root.after(self.update_speed, recieve)
 
