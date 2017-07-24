@@ -22,7 +22,7 @@ class GUI:
 		scrolling_text = Frame(root, height = 420, width = 700)
 
 		main_view.visible = False
-		connection_flag = 1
+		main_view.connection_flag = True
 
 		user_setup.grid(row=0, column=0, sticky='news')
 		main_view.grid(row=0, column=0, sticky='news')
@@ -118,16 +118,14 @@ class GUI:
 					message_text['state'] = DISABLED
 					message_text.see(END)
 
-				if client_handler.connected() == False and self.connection_flag == 1:
+					
+				if client_handler.connected() == False and main_view.connection_flag == True:
 					message_text['state'] = NORMAL
-					message_text.insert(END,"\nYou have lost connection to the server")
+					message_text.insert(END, "\nYou have lost connection to the server")
 					message_text['state'] = DISABLED
-					connection_flag = 0
-				elif client_handler.connected() == True and self.connection_flag == 0:
-					message_text['state'] = NORMAL
-					message_text.insert(END,"\nYou have regained connection to the server")
-					message_text['state'] = DISABLED
-					connection_flag = 0
+					message_text.see(END)
+					main_view.connection_flag = False
+
 
 			root.after(self.update_speed, recieve)
 
