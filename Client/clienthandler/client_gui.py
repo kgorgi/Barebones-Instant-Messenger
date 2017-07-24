@@ -103,7 +103,7 @@ class GUI:
 		for i in range(1,28):
 			message_text.insert(INSERT, "\n")
 
-		message_text.insert(INSERT, "You are in a chatroom -_-")
+		message_text.insert(INSERT, "You are in a chat room -_-")
 		message_text['state'] = DISABLED
 
 
@@ -190,7 +190,7 @@ class GUI:
 		def on_closing():
 			#input function to leave
 			client_handler.quit()
-			print("goodbye")
+			print("Goodbye")
 			root.destroy()
 
 		#begin recieving loop, adjust main window settings, and start loop

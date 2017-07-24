@@ -133,7 +133,6 @@ class ServerNetwork(Networking):
             d_lock.release()
 
 
-
                 # logging.info("Sent(" + addr + "): " + msg_to_send)
     def _exceute_receive(self, s_dict, d_lock, delete_lock, r_queue):
 
@@ -157,10 +156,10 @@ class ServerNetwork(Networking):
                         msg = msg.rstrip(" ")
                         logging.info("Received(" + key + "): " + msg)
 
+                        r_queue.put(msg)
                         if msg[13] == "Q":  #Client Shutdown
                             shut_down_socket(s)
                             break
-                        r_queue.put(msg)
 
                 except socket.error as e:
                     err = e.args[0]

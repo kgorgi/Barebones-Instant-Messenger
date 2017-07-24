@@ -65,7 +65,6 @@ class ChatManager:
 		elif(cmd["command"] == "S"): #Send
 			self.send_message(cmd)
 		else:
-			logging.debug("Invalid command:" + cmd["command"])
 			return False
 		return True
 
@@ -79,13 +78,11 @@ class ChatManager:
 
 				command = self._parse_incoming(next_msg)
 				if not self._execute_cmd(command):
-					pass
+					logging.debug("Invalid command:" + command["command"])
 		except KeyboardInterrupt:
 			logging.info("Shutting Down ChatManager")
 			del self
 
-
-	#These functions should follow architecture with parameters
 	def create_room(self, cmd):
 		logging.info("Creating Room: " + cmd["room"])
 
