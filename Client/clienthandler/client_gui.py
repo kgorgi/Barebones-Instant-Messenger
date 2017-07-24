@@ -117,8 +117,8 @@ class GUI:
 					message_text['state'] = DISABLED
 					message_text.see(END)
 					
-					if client_handler.connected() == False:
-						message_text.insert(END,"\nYou have lost connection to the server")
+				if client_handler.connected() == False:
+					message_text.insert(END,"\nYou have lost connection to the server")
 
 			root.after(self.update_speed, recieve)
 
