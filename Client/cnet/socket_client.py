@@ -76,6 +76,8 @@ class ClientNetworking(Networking):
                     msg_received = msg_received.decode("utf-8").rstrip(" ")
                     r_queue.put(msg_received)
                     logging.info("Received Message: " + "\"" +  msg_received + "\"")
+                else:
+                    self.is_connected = False
             except socket.error as e:
                 err = e.args[0]
                 if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
