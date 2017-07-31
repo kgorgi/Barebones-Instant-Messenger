@@ -110,6 +110,7 @@ class GUI:
 
 		#recieve func
 		def recieve():
+			#recieve message if in the chatting view
 			if main_view.visible == True:
 				new_message = client_handler.update()
 				if new_message is not None:
@@ -118,13 +119,18 @@ class GUI:
 					message_text['state'] = DISABLED
 					message_text.see(END)
 
-					
+				#display error message in chat text if connection is lost
 				if client_handler.connected() == False and main_view.connection_flag == True:
 					message_text['state'] = NORMAL
 					message_text.insert(END, "\nYou have lost connection to the server")
 					message_text['state'] = DISABLED
 					message_text.see(END)
 					main_view.connection_flag = False
+
+			#if connection lost during login display error message
+			if main_view.visible == False and client_handler.connected() == False and main_view.connection_flag == True:
+				error_message.set("Lost Connection To Server, Please Restart")
+				error.place(x=300, y = 280)
 
 
 			root.after(self.update_speed, recieve)
