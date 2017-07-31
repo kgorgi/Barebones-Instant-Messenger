@@ -59,7 +59,7 @@ class ClientNetworking(Networking):
         while True:
             msg_to_send = s_queue.get()
             s_queue.task_done()
-            #logging.info("Sending message: " + "\"" + msg_to_send.rstrip(" ")+  "\"")
+            logging.info("Sending message: " + "\"" + msg_to_send.rstrip(" ")+  "\"")
 
             s.send(msg_to_send.encode('utf-8'))
 

@@ -7,7 +7,7 @@ class ClientHandler(ClientBackend):
     SUCCESS = "0"
 
     def __init__(self):
-        self._networkService = ClientNetworking("134.87.147.243", 8000)
+        self._networkService = ClientNetworking("127.0.0.1", 8000)
         self.room_name = ""
         self.alias_name = ""
         self.client_address = self._networkService.get_local_address()
