@@ -28,7 +28,7 @@ class GUI:
 		main_view.grid(row=0, column=0, sticky='news')
 		scrolling_text.place(x = 10, y = 10)
 
-		root.title("ChatClient")
+		root.title("Barebones Instant Messenger")
 
 		#user_setup widgets initialized
 
