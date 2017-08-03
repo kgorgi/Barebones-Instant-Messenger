@@ -16,7 +16,7 @@ class ClientHandler(ClientBackend):
         logging.info("Attempting to join the room " + room_name)
         join_json = self._create_instruction("J", alias, room_name, None)
         self._networkService.send_message(join_json)
-        server_feedback = self._getServerFeedback()
+        server_feedback = self._get_server_feedback()
         
         if server_feedback is self.SUCCESS:
             self.room_name = room_name
@@ -29,7 +29,7 @@ class ClientHandler(ClientBackend):
         create_json = self._create_instruction("C", alias, r_name, None)
         self._networkService.send_message(create_json)
         logging.info("Attempting to create the room " + r_name)
-        server_feedback = self._getServerFeedback()
+        server_feedback = self._get_server_feedback()
 
         if server_feedback is self.SUCCESS:
             self.room_name = r_name
@@ -57,7 +57,7 @@ class ClientHandler(ClientBackend):
 
     def connected(self):
         #logging.info("The server is connected: "+ str(self._networkService.is_connected))
-        return self._networkService.is_connected
+        return self._networkService.connected_to_server()
 
 
     def send_message(self, msg):
@@ -78,11 +78,9 @@ class ClientHandler(ClientBackend):
 
         return json.dumps(message)
 
-    def _getServerFeedback(self):
+    def _get_server_feedback(self):
         server_feedback = None
         while server_feedback is None:
             server_feedback = self._networkService.receive_next_message()
 
         return server_feedback
-
-

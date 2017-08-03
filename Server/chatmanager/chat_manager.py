@@ -4,6 +4,19 @@ import settings
 from chatmanager.room import Room
 from snet.socket_server import ServerNetwork
 
+"""
+	JSON form:
+	Form:
+		message=
+			{
+				"command": "",
+				"alias": "",
+				"address": "",
+				"room": "",
+				"message":""
+			}
+"""
+
 class ChatManager:
 	_host = settings.ChatServer.get('host')
 	_port = settings.ChatServer.get('port')
@@ -14,19 +27,6 @@ class ChatManager:
 		logging.info("Starting ChatManager")
 		self._rooms = dict()
 		self._networkService = ServerNetwork(self._host, self._port)
-	
-	"""
-		JSON form:
-		Form:
-			message=
-				{
-					"command": "",
-					"alias": "",
-					"address": "",
-					"room": "",
-					"message":""
-				}
-	"""
 
 	def _parse_incoming(self, in_json):
 		cmd_data = json.loads(in_json)

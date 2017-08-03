@@ -87,6 +87,9 @@ class ClientNetworking(Networking):
                     logging.debug("ERROR: " + str(e))
                     break
 
+    def connected_to_server(self):
+        return self.is_connected
+
     def shutdown(self):
         logging.info("ClientNetworking Shutting Down")
         if (self._successful_init):
@@ -96,42 +99,4 @@ class ClientNetworking(Networking):
 
     def __del__(self):
         self.shutdown()
-
-
-def main():
-    i = ClientNetworking("127.0.0.1", 8000)
-    i.send_message("hello spicy boy")
-
-    time.sleep(5)
-    i.shutdown()
-    """""
-    clients = list()
-    for i in range(1, 200):
-        print(str(i))
-        temp = ClientNetworking()
-        clients.append(temp)
-
-    print("Connection Created!")
-    x = 0;
-    for c in clients:
-        x += 1
-        c.send_message(str(x))
-
-    time.sleep(10)
-    print("SENT!")
-    while True:
-        for c in clients:
-            msg = c.receive_next_message()
-            if msg != None:
-                print("recieved:"+msg)
-
-    time.sleep(10)
-
-
-    """
-
-
-if __name__ == "__main__":
-    main()
-
 

@@ -12,3 +12,5 @@ class Networking:
     @abstractmethod
     def receive_next_message(self): raise NotImplementedError
 
+    @abstractmethod
+    def connected_to_server(self): raise NotImplementedError

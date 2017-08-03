@@ -20,3 +20,6 @@ class ClientBackend:
 
     @abstractmethod
     def send_message(self, msg): raise NotImplementedError
+
+    @abstractmethod
+    def connected(self): raise NotImplementedError
