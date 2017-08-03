@@ -1,0 +1,1 @@
+Note: In order for the booter files to function properly, they must be placed located in client folder. 
