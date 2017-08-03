@@ -1,4 +1,4 @@
-# Chat System Project
+# Barebones Instant Messenger (BIM)
 
 # Style Guide
 Note this style guide adheres to PEP 8.
