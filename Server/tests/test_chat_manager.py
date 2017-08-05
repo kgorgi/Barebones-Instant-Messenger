@@ -14,7 +14,6 @@ class TestChatManager(unittest.TestCase):
         ans = {"command": "a","alias": "b","address": "c","room": "d","message": None}
         self.assertEqual(self.cm._parse_incoming(jsin), ans)
 
-
     def test__execute_invalid_cmd(self):
         cmd = self.create_command("D", "b", "c", "d", None)
         self.assertFalse(self.cm._execute_cmd(cmd))

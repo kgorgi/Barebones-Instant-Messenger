@@ -34,7 +34,7 @@ class ChatManager:
 		for item in cmd_data:
 			item = str(item)
 
-		#Build Reponse String
+		#Build Response String
 		log_str = ""
 		for key, item in cmd_data.items():
 			log_str = log_str + str(key) + ":" + str(item) + " "

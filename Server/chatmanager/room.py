@@ -18,7 +18,6 @@ class Room:
 
     def remove_user(self, address, alias):
         # Only deletes first instance of alias and address, doesn't check duplicates
-        #Add ability to delete based only on address
         if address in self._address_list and alias in self._alias_list:
             self._address_list.remove(address)
             self._alias_list.remove(alias)
