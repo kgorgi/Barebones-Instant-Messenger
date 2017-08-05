@@ -2,7 +2,6 @@ import logging
 import socket
 import queue
 import threading
-import time
 import errno
 import sys
 from cnet.cnet_interface import Networking
