@@ -99,7 +99,7 @@ class ServerNetwork(Networking):
             #Send Message
             d_lock.acquire()
 
-            logging.info("Networking: Sending Messages: " + msg_to_send)
+            logging.info("Networking: Sending Messages: " + msg_to_send.rstrip(" "))
 
             #Create Sublists of Address List
             addr_chunks = list()
