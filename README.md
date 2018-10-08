@@ -12,3 +12,10 @@ This GitHub repo is for our team project for the University of Victoria's SENG 2
 * Both the server and client use python multi-threading
 * Network communication handled with python sockets
 * High cohesion, low coupling system architecture 
+
+## Demos
+
+### Creating a Chat Room 
+![](Demo_Gifs/Create_Chatroom.gif?raw=true)
+### Messaging 
+![](Demo_Gifs/Messaging.gif?raw=true)
