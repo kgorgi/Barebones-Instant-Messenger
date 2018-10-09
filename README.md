@@ -16,6 +16,7 @@ This GitHub repo is for our team project for the University of Victoria's SENG 2
 ## Demos
 
 ### Creating a Chat Room 
-![](Demo_Gifs/Create_Chatroom.gif?raw=true)
+<img src="https://raw.githubusercontent.com/kgorgi/Barebones-Instant-Messenger/master/Demo_Gifs/Create_Chatroom.gif" width="60%" height="60%">
+
 ### Messaging 
-![](Demo_Gifs/Messaging.gif?raw=true)
+<img src="https://raw.githubusercontent.com/kgorgi/Barebones-Instant-Messenger/master/Demo_Gifs/Messaging.gif" width="60%" height="60%">
